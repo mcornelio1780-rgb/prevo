@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prevo — ¡Gracias!</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base.css">
+<style>main{max-width:760px;margin:0 auto;padding:9vh 5vw}h1{font-size:clamp(36px,5vw,60px);line-height:1;font-weight:800}
+ol{display:grid;gap:14px;padding-left:22px;margin:28px 0}li{padding-left:6px}.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}</style>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script src="assets/prevo.js"></script>
+</head><body>
+<header class="top"><a id="logo" href="index.html" aria-label="Prevo"></a><nav><select id="lang" aria-label="Idioma"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option></select></nav></header>
+<main>
+<svg width="72" height="72" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 50 L90 26 Q96 50 90 74 Z" fill="#CBD2FF"/><circle cx="34" cy="50" r="17" fill="none" stroke="#2E3CF0" stroke-width="9.5"/><circle cx="34" cy="50" r="6.5" fill="#FFB020"/></svg>
+<h1 data-i="h"></h1>
+<p style="font-size:19px;color:var(--slate)" data-i="p"></p>
+<ol id="steps"></ol>
+<p class="note" id="ref"></p>
+<div class="row"><a class="btn p" id="toApp" data-i="app"></a><a class="btn" id="mail" data-i="mail"></a><a class="btn" id="home" data-i="home"></a></div>
+</main>
+<script>
+window.addEventListener('error',e=>{e.preventDefault();return true});
+const T={
+es:{h:'¡Pago recibido, gracias!',p:'Polar te envió el comprobante por correo. Esto es lo que sigue:',s:['Envíanos tu historial (Excel o CSV con fecha y ventas) respondiendo el correo de Polar o escribiendo a {m}.','Revisamos tus datos y preparamos el pronóstico con modelos de series de tiempo.','Te entregamos el reporte en PDF y CSV en menos de 48 horas, con una llamada de 15 minutos para revisarlo.'],app:'Probar mis datos ahora',mail:'Enviar mi historial',home:'Volver al inicio',ref:'Referencia de compra: ',subj:'Mi historial para Prevo'},
+en:{h:'Payment received, thank you!',p:'Polar emailed you the receipt. Here’s what happens next:',s:['Send us your history (Excel or CSV with date and sales) by replying to the Polar email or writing to {m}.','We review your data and build the forecast with time-series models.','You get the PDF and CSV report within 48 hours, plus a 15-minute review call.'],app:'Try my data now',mail:'Send my history',home:'Back to home',ref:'Purchase reference: ',subj:'My history for Prevo'},
+pt:{h:'Pagamento recebido, obrigado!',p:'A Polar enviou o comprovante por e-mail. Os próximos passos:',s:['Envie seu histórico (Excel ou CSV com data e vendas) respondendo o e-mail da Polar ou escrevendo para {m}.','Revisamos seus dados e preparamos a previsão com modelos de séries temporais.','Entregamos o relatório em PDF e CSV em até 48 horas, com uma call de 15 minutos.'],app:'Testar meus dados agora',mail:'Enviar meu histórico',home:'Voltar ao início',ref:'Referência da compra: ',subj:'Meu histórico para a Prevo'},
+fr:{h:'Paiement reçu, merci !',p:'Polar vous a envoyé le reçu par e-mail. Voici la suite :',s:['Envoyez-nous votre historique (Excel ou CSV avec date et ventes) en répondant à l’e-mail de Polar ou en écrivant à {m}.','Nous vérifions vos données et préparons la prévision avec des modèles de séries temporelles.','Vous recevez le rapport PDF et CSV sous 48 heures, avec un appel de revue de 15 minutes.'],app:'Essayer mes données',mail:'Envoyer mon historique',home:'Retour à l’accueil',ref:'Référence d’achat : ',subj:'Mon historique pour Prevo'}};
+const $=s=>document.querySelector(s);let L=Prevo.getLang();const P=new URLSearchParams(location.search);const m=Prevo.C.contactEmail||'hola@prevo.ai';
+const cid=(P.get('checkout_id')||'').replace(/[^\w-]/g,'').slice(0,100);
+function apply(){const d=T[L];document.documentElement.lang=L;$('#lang').value=L;document.querySelectorAll('[data-i]').forEach(e=>{if(typeof d[e.dataset.i]=='string')e.textContent=d[e.dataset.i]});
+$('#steps').innerHTML=d.s.map(x=>`<li>${x.replace('{m}','<a href="mailto:'+m+'">'+m+'</a>')}</li>`).join('');$('#ref').textContent=cid?d.ref+cid:'';
+$('#toApp').href=Prevo.link('app.html');$('#home').href=Prevo.link('index.html');$('#logo').href=Prevo.link('index.html');
+$('#mail').href=`mailto:${m}?subject=${encodeURIComponent(d.subj+(cid?' · '+cid:''))}`}
+$('#lang').onchange=e=>{L=e.target.value;Prevo.setLang(L);apply()};
+$('#logo').innerHTML=Prevo.logo(Prevo.isDark()?'negative':'positive',30);apply();
+(async()=>{if(!cid)return;const k='prevo_ret_'+cid;if(Prevo.store.get(k))return;const u=await Prevo.getUser();
+ await Prevo.insert('checkout_returns',{checkout_id:cid,plan:(P.get('plan')||'').slice(0,40)||null,email:u?u.email:null,user_id:u?u.id:null,lang:L});Prevo.store.set(k,'1')})();
+</script></body></html>

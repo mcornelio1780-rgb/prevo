@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prevo — Iniciar sesión</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base.css">
+<style>
+main{min-height:calc(100vh - 70px);display:grid;grid-template-columns:1fr 1fr}
+.side{background:#0E1630;color:#F3F4F7;padding:8vh 5vw;display:flex;flex-direction:column;justify-content:space-between;gap:30px}
+.side h2{font-size:clamp(30px,3.4vw,48px);line-height:1.05;font-weight:800;max-width:14ch}
+.side ul{padding:0;list-style:none;display:grid;gap:12px;color:#CBD2FF}
+.side li::before{content:"";display:inline-block;width:9px;height:9px;border:3px solid #FFB020;border-radius:50%;margin-right:10px}
+.box{padding:8vh 5vw;display:flex;justify-content:center}
+.card{width:100%;max-width:420px}
+.tabs{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin:22px 0}
+.tabs button{flex:1;border:0;background:none;padding:10px;border-radius:999px;font-weight:600;cursor:pointer;color:var(--slate)}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--paper)}
+form{display:grid;gap:12px}
+label{font-size:14px;color:var(--slate);display:grid;gap:6px}
+.or{display:flex;align-items:center;gap:12px;color:var(--slate);font-size:13px;margin:16px 0}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.g{width:100%}
+.pw{position:relative}.pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--slate);cursor:pointer;font-size:13px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
+.chk input{margin-top:4px}
+.hidden{display:none!important}
+.linkbtn{border:0;background:none;color:var(--ultra);cursor:pointer;padding:0;font-size:14px;justify-self:start}
+@media (max-width:860px){main{grid-template-columns:1fr}.side{display:none}}
+</style>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script src="assets/prevo.js"></script>
+</head><body>
+<header class="top"><a id="logo" href="index.html" aria-label="Prevo"></a>
+<nav><select id="lang" aria-label="Idioma"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option></select>
+<a class="btn sm" id="back" href="index.html" data-i="back" style="white-space:nowrap"></a></nav></header>
+<main>
+<aside class="side"><div id="sideLogo"></div><div><h2 data-i="sideT"></h2><ul data-list="sideL"></ul></div><p class="note" style="color:#9AA3BB" data-i="sideN"></p></aside>
+<section class="box"><div class="card">
+<h1 id="ttl" style="font-size:32px"></h1>
+<p class="note" id="sub"></p>
+<div id="msg" role="status" aria-live="polite"></div>
+<div id="authArea">
+<div class="tabs" role="tablist"><button type="button" role="tab" data-tab="in" aria-selected="true" data-i="tIn"></button><button type="button" role="tab" data-tab="up" aria-selected="false" data-i="tUp"></button></div>
+<button type="button" class="btn g" id="google"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span data-i="google"></span></button>
+<div class="or" data-i="or"></div>
+<form id="f" novalidate>
+<label><span data-i="email"></span><input type="email" id="em" autocomplete="email" required></label>
+<label class="pwl"><span data-i="pass"></span><span class="pw"><input type="password" id="pw" autocomplete="current-password" minlength="8" required><button type="button" id="show" data-i="show"></button></span></label>
+<label class="chk hidden" id="termsRow"><input type="checkbox" id="terms"><span id="termsTxt"></span></label>
+<button class="btn p" type="submit" id="go"></button>
+<button type="button" class="linkbtn" id="forgot" data-i="forgot"></button>
+</form>
+</div>
+<form id="resetF" class="hidden" novalidate>
+<label><span data-i="newPass"></span><input type="password" id="pw2" autocomplete="new-password" minlength="8" required></label>
+<button class="btn p" type="submit" data-i="savePass"></button>
+</form>
+<p class="note" style="margin-top:22px"><span data-i="noAcc"></span> <a id="tryLink" href="app.html" data-i="tryFree"></a></p>
+</div></section></main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+window.addEventListener('error',e=>{e.preventDefault();return true});
+const T={
+es:{back:'Volver al sitio',sideT:'Tus pronósticos, guardados y listos para comprar.',sideL:['Guarda cada pronóstico y vuelve a abrirlo cuando quieras','Compra el reporte completo con tu correo ya cargado','Tus datos solo los ves tú'],sideN:'Puedes usar la prueba gratis sin cuenta.',in:'Inicia sesión',up:'Crea tu cuenta',subIn:'Entra con Google o con tu correo.',subUp:'Gratis. Te enviaremos un correo para activarla.',tIn:'Entrar',tUp:'Crear cuenta',google:'Continuar con Google',or:'o con tu correo',email:'Correo',pass:'Contraseña (mínimo 8 caracteres)',show:'Ver',hide:'Ocultar',terms:'Acepto los <a href="#" data-l="terminos">Términos</a>, la <a href="#" data-l="privacidad">Política de privacidad</a> y la <a href="#" data-l="ia">Política de IA</a>.',goIn:'Entrar',goUp:'Crear cuenta',forgot:'¿Olvidaste tu contraseña?',newPass:'Nueva contraseña (mínimo 8 caracteres)',savePass:'Guardar contraseña',resetT:'Crea una nueva contraseña',noAcc:'¿Solo quieres probar?',tryFree:'Usa la prueba gratis sin cuenta',cfg:'El inicio de sesión se activa cuando se configura Supabase en config.js. Mientras tanto puedes usar la prueba gratis.',
+e_email:'Escribe un correo válido.',e_pass:'La contraseña debe tener al menos 8 caracteres.',e_terms:'Acepta los términos para crear tu cuenta.',e_cred:'Correo o contraseña incorrectos.',e_conf:'Tu cuenta aún no está activada. Revisa tu correo (y la carpeta de spam).',e_exists:'Ese correo ya tiene cuenta. Inicia sesión o recupera tu contraseña.',e_rate:'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',e_gen:'No se pudo completar. Inténtalo de nuevo.',
+ok_up:'¡Listo! Te enviamos un correo a {e}. Abre el enlace para activar tu cuenta.',ok_in:'Sesión iniciada. Te llevamos…',ok_reset:'Te enviamos un correo para crear una nueva contraseña.',ok_pass:'Contraseña actualizada. Ya puedes usar tu cuenta.',ok_conf:'Cuenta activada. ¡Bienvenido!'},
+en:{back:'Back to site',sideT:'Your forecasts, saved and ready to buy.',sideL:['Save every forecast and reopen it anytime','Buy the full report with your email already filled in','Only you can see your data'],sideN:'You can use the free trial without an account.',in:'Log in',up:'Create your account',subIn:'Continue with Google or your email.',subUp:'Free. We’ll email you to activate it.',tIn:'Log in',tUp:'Sign up',google:'Continue with Google',or:'or with your email',email:'Email',pass:'Password (at least 8 characters)',show:'Show',hide:'Hide',terms:'I accept the <a href="#" data-l="terminos">Terms</a>, the <a href="#" data-l="privacidad">Privacy Policy</a> and the <a href="#" data-l="ia">AI Policy</a>.',goIn:'Log in',goUp:'Create account',forgot:'Forgot your password?',newPass:'New password (at least 8 characters)',savePass:'Save password',resetT:'Create a new password',noAcc:'Just want to try it?',tryFree:'Use the free trial without an account',cfg:'Login turns on once Supabase is set in config.js. Meanwhile you can use the free trial.',
+e_email:'Enter a valid email.',e_pass:'Password must be at least 8 characters.',e_terms:'Accept the terms to create your account.',e_cred:'Wrong email or password.',e_conf:'Your account isn’t activated yet. Check your inbox (and spam).',e_exists:'That email already has an account. Log in or reset your password.',e_rate:'Too many attempts. Wait a few minutes and try again.',e_gen:'Couldn’t complete that. Please try again.',
+ok_up:'Done! We sent an email to {e}. Open the link to activate your account.',ok_in:'Logged in. Taking you there…',ok_reset:'We sent you an email to create a new password.',ok_pass:'Password updated. You can use your account now.',ok_conf:'Account activated. Welcome!'},
+pt:{back:'Voltar ao site',sideT:'Suas previsões, salvas e prontas para comprar.',sideL:['Salve cada previsão e abra quando quiser','Compre o relatório completo com seu e-mail já preenchido','Só você vê seus dados'],sideN:'Você pode usar o teste grátis sem conta.',in:'Entrar',up:'Crie sua conta',subIn:'Entre com Google ou com seu e-mail.',subUp:'Grátis. Enviaremos um e-mail para ativar.',tIn:'Entrar',tUp:'Criar conta',google:'Continuar com Google',or:'ou com seu e-mail',email:'E-mail',pass:'Senha (mínimo 8 caracteres)',show:'Ver',hide:'Ocultar',terms:'Aceito os <a href="#" data-l="terminos">Termos</a>, a <a href="#" data-l="privacidad">Política de privacidade</a> e a <a href="#" data-l="ia">Política de IA</a>.',goIn:'Entrar',goUp:'Criar conta',forgot:'Esqueceu a senha?',newPass:'Nova senha (mínimo 8 caracteres)',savePass:'Salvar senha',resetT:'Crie uma nova senha',noAcc:'Só quer testar?',tryFree:'Use o teste grátis sem conta',cfg:'O login é ativado quando o Supabase é configurado em config.js. Enquanto isso, use o teste grátis.',
+e_email:'Digite um e-mail válido.',e_pass:'A senha deve ter pelo menos 8 caracteres.',e_terms:'Aceite os termos para criar sua conta.',e_cred:'E-mail ou senha incorretos.',e_conf:'Sua conta ainda não foi ativada. Verifique seu e-mail (e o spam).',e_exists:'Esse e-mail já tem conta. Entre ou recupere sua senha.',e_rate:'Muitas tentativas. Aguarde alguns minutos.',e_gen:'Não foi possível concluir. Tente de novo.',
+ok_up:'Pronto! Enviamos um e-mail para {e}. Abra o link para ativar sua conta.',ok_in:'Login feito. Levando você…',ok_reset:'Enviamos um e-mail para criar uma nova senha.',ok_pass:'Senha atualizada. Já pode usar sua conta.',ok_conf:'Conta ativada. Bem-vindo!'},
+fr:{back:'Retour au site',sideT:'Vos prévisions, enregistrées et prêtes à l’achat.',sideL:['Enregistrez chaque prévision et rouvrez-la quand vous voulez','Achetez le rapport complet avec votre e-mail déjà rempli','Vous seul voyez vos données'],sideN:'Vous pouvez utiliser l’essai gratuit sans compte.',in:'Se connecter',up:'Créer votre compte',subIn:'Continuez avec Google ou votre e-mail.',subUp:'Gratuit. Nous vous envoyons un e-mail d’activation.',tIn:'Connexion',tUp:'Créer un compte',google:'Continuer avec Google',or:'ou avec votre e-mail',email:'E-mail',pass:'Mot de passe (8 caractères minimum)',show:'Voir',hide:'Masquer',terms:'J’accepte les <a href="#" data-l="terminos">Conditions</a>, la <a href="#" data-l="privacidad">Politique de confidentialité</a> et la <a href="#" data-l="ia">Politique IA</a>.',goIn:'Se connecter',goUp:'Créer le compte',forgot:'Mot de passe oublié ?',newPass:'Nouveau mot de passe (8 caractères minimum)',savePass:'Enregistrer',resetT:'Créez un nouveau mot de passe',noAcc:'Vous voulez juste essayer ?',tryFree:'Utilisez l’essai gratuit sans compte',cfg:'La connexion s’active une fois Supabase configuré dans config.js. En attendant, utilisez l’essai gratuit.',
+e_email:'Saisissez un e-mail valide.',e_pass:'Le mot de passe doit contenir au moins 8 caractères.',e_terms:'Acceptez les conditions pour créer votre compte.',e_cred:'E-mail ou mot de passe incorrect.',e_conf:'Votre compte n’est pas encore activé. Vérifiez vos e-mails (et les spams).',e_exists:'Cet e-mail a déjà un compte. Connectez-vous ou réinitialisez le mot de passe.',e_rate:'Trop de tentatives. Patientez quelques minutes.',e_gen:'Impossible de terminer. Réessayez.',
+ok_up:'C’est fait ! E-mail envoyé à {e}. Ouvrez le lien pour activer votre compte.',ok_in:'Connecté. Redirection…',ok_reset:'Nous vous avons envoyé un e-mail pour créer un nouveau mot de passe.',ok_pass:'Mot de passe mis à jour. Vous pouvez utiliser votre compte.',ok_conf:'Compte activé. Bienvenue !'}};
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+let L=Prevo.getLang(),mode='in';
+const P=new URLSearchParams(location.search);
+const next=(P.get('next')||'app.html').replace(/[^a-z0-9._#?=&-]/gi,'');
+const t=k=>T[L][k];
+const origin=/^https?:/.test(location.protocol)?location.origin:(Prevo.C.siteUrl||'');
+const nextUrl=()=>origin+'/'+Prevo.link(next.split('?')[0]);
+function msg(type,txt){$('#msg').innerHTML=txt?`<div class="alert ${type}">${txt}</div>`:''}
+function errText(e){const m=String((e&&e.message)||e||'').toLowerCase();
+ if(m.includes('invalid login'))return t('e_cred');if(m.includes('not confirmed'))return t('e_conf');
+ if(m.includes('already')&&m.includes('regist'))return t('e_exists');if(m.includes('rate')||m.includes('security purposes')||m.includes('429'))return t('e_rate');
+ if(m.includes('password'))return t('e_pass');return t('e_gen')}
+function apply(){document.documentElement.lang=L;$('#lang').value=L;
+ $$('[data-i]').forEach(e=>{const v=T[L][e.dataset.i];if(typeof v=='string')e.textContent=v});
+ $$('[data-list]').forEach(u=>u.innerHTML=T[L][u.dataset.list].map(x=>`<li>${x}</li>`).join(''));
+ $('#termsTxt').innerHTML=t('terms');$$('#termsTxt a').forEach(a=>{a.href=Prevo.link('legal.html')+'#'+a.dataset.l;a.target='_blank';a.rel='noopener'});
+ $('#back').href=Prevo.link('index.html');$('#logo').href=Prevo.link('index.html');$('#tryLink').href=Prevo.link('app.html');
+ setMode(mode)}
+function setMode(m){mode=m;const reset=m=='reset';
+ $('#authArea').classList.toggle('hidden',reset);$('#resetF').classList.toggle('hidden',!reset);
+ $('#ttl').textContent=reset?t('resetT'):(m=='up'?t('up'):t('in'));$('#sub').textContent=reset?'':(m=='up'?t('subUp'):t('subIn'));
+ $$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab==m));
+ $('#termsRow').classList.toggle('hidden',m!='up');$('#forgot').classList.toggle('hidden',m=='up');
+ $('#go').textContent=m=='up'?t('goUp'):t('goIn');$('#pw').autocomplete=m=='up'?'new-password':'current-password'}
+$('#lang').onchange=e=>{L=e.target.value;Prevo.setLang(L);apply()};
+$$('.tabs button').forEach(b=>b.onclick=()=>{msg();setMode(b.dataset.tab)});
+$('#show').onclick=()=>{const p=$('#pw');p.type=p.type=='password'?'text':'password';$('#show').textContent=p.type=='password'?t('show'):t('hide')};
+const sb=Prevo.sb;
+if(!sb){location.replace(Prevo.link('app.html'))}
+$('#google').onclick=async()=>{if(!sb)return;msg();const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:nextUrl()}});if(error)msg('err',errText(error))};
+$('#f').onsubmit=async e=>{e.preventDefault();if(!sb)return;msg();
+ const email=$('#em').value.trim(),pw=$('#pw').value;
+ if(!Prevo.emailOk(email))return msg('err',t('e_email'));if(pw.length<8)return msg('err',t('e_pass'));
+ if(mode=='up'&&!$('#terms').checked)return msg('err',t('e_terms'));
+ $('#go').disabled=true;
+ try{if(mode=='up'){const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:origin+'/'+Prevo.link('login.html',{confirmed:'1',next}),data:{lang:L,terms_accepted_at:new Date().toISOString()}}});
+   if(error)throw error;
+   if(data&&data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw {message:'already registered'};
+   if(data&&data.session){msg('ok',t('ok_in'));location.href=nextUrl()}else msg('ok',t('ok_up').replace('{e}',email.replace(/</g,'')))}
+  else{const {error}=await sb.auth.signInWithPassword({email,password:pw});if(error)throw error;msg('ok',t('ok_in'));location.href=nextUrl()}}
+ catch(err){msg('err',errText(err))}finally{$('#go').disabled=false}};
+$('#forgot').onclick=async()=>{if(!sb)return;const email=$('#em').value.trim();if(!Prevo.emailOk(email)){msg('err',t('e_email'));$('#em').focus();return}
+ const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:origin+'/'+Prevo.link('login.html',{mode:'reset'})});msg(error?'err':'ok',error?errText(error):t('ok_reset'))};
+$('#resetF').onsubmit=async e=>{e.preventDefault();const pw=$('#pw2').value;if(pw.length<8)return msg('err',t('e_pass'));
+ const {error}=await sb.auth.updateUser({password:pw});if(error)return msg('err',errText(error));msg('ok',t('ok_pass'));setTimeout(()=>location.href=nextUrl(),1500)};
+const lt=Prevo.isDark()?'negative':'positive';$('#logo').innerHTML=Prevo.logo(lt,30);$('#sideLogo').innerHTML=Prevo.logo('negative',34);
+apply();
+if(P.get('mode')=='reset')setMode('reset');
+if(P.get('mode')=='signup')setMode('up');
+Prevo.onAuth((ev,u)=>{if(ev=='PASSWORD_RECOVERY')setMode('reset')});
+(async()=>{const u=await Prevo.getUser();if(u&&P.get('mode')!='reset'){msg('ok',P.get('confirmed')?t('ok_conf'):t('ok_in'));setTimeout(()=>location.href=nextUrl(),800)}})();
+</script></body></html>

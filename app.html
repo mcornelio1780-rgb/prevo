@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prevo — App de pronóstico</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0E1630;--ultra:#2E3CF0;--mist:#CBD2FF;--saffron:#FFB020;--paper:#F3F4F7;--slate:#5B6478;--line:#D9DCE4;--card:#fff;--good:#0F7B4A;--bad:#C0263A;
+--display:'Bricolage Grotesque','Avenir Next','Segoe UI',sans-serif;--body:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--ink:#E9ECF5;--paper:#0B1124;--card:#131B33;--line:#26304D;--slate:#9AA3BB;--mist:#3A4890;color-scheme:dark}}
+:root[data-theme=dark]{--ink:#E9ECF5;--paper:#0B1124;--card:#131B33;--line:#26304D;--slate:#9AA3BB;--mist:#3A4890;color-scheme:dark}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--saffron);outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 4vw;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:env(safe-area-inset-top,0px);z-index:10}
+header nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,input,button,textarea{font:inherit;color:inherit}
+select,input[type=text],input[type=email],input[type=number],textarea{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;text-decoration:none;color:var(--ink)}
+.btn.p{background:#2E3CF0;border-color:#2E3CF0;color:#fff}.btn.p:hover{background:#2230d0}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1180px;margin:0 auto;padding:36px 4vw 80px}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;margin:0}
+h1{font-size:clamp(30px,4vw,48px);line-height:1.05;font-weight:700}
+h2{font-size:24px;font-weight:700;margin-bottom:6px}
+.sub{color:var(--slate);max-width:62ch}
+.steps{display:flex;gap:6px;margin:26px 0 22px;flex-wrap:wrap}
+.steps span{padding:6px 14px;border-radius:99px;border:1px solid var(--line);font-size:14px;color:var(--slate)}
+.steps span.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.steps span.done{border-color:var(--ultra);color:var(--ultra)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;margin-bottom:18px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--ultra);background:rgba(46,60,240,.06)}
+.samples{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.sample{text-align:left;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}
+.sample:hover{border-color:var(--ultra)}
+.sample b{display:block;font-family:var(--display);font-size:17px}
+.sample small{color:var(--slate)}
+.row{display:flex;gap:16px;flex-wrap:wrap;align-items:end}
+.row label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--slate);min-width:180px;flex:1}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--card)}
+.kpi .v{font:700 30px/1.1 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:13px;color:var(--slate)}
+.v.good{color:var(--good)}.v.bad{color:var(--bad)}
+#chart{width:100%;height:auto;display:block}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--slate);margin-top:8px}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--slate);font-weight:600;font-size:13px}
+tr.best td{background:rgba(46,60,240,.07);font-weight:600}
+.recs li{margin-bottom:8px}
+.note{font-size:13px;color:var(--slate)}
+.err{color:var(--bad);font-weight:500;margin-top:10px}
+.cta{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:center;background:#0E1630;color:#F3F4F7;border-color:#0E1630}
+.cta .note{color:#CBD2FF}
+.hidden{display:none!important}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#0E1630;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+@media (max-width:640px){header{padding:10px 4vw}header nav{gap:6px}#backLink,#theme{display:none}#authNav .btn{padding:8px 12px;font-size:13px}#lang{max-width:110px;padding:8px}}
+@media (max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.samples{grid-template-columns:1fr}.cta{grid-template-columns:1fr}}
+@media print{header,.steps,#stepLoad,#stepSet,.cta,.noprint{display:none!important}body{background:#fff}.panel{border:0;padding:0}}
+</style><script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script src="assets/prevo.js"></script>
+</head><body>
+<header>
+<a href="index.html" id="logo" aria-label="Prevo"></a>
+<nav>
+<select id="lang" aria-label="Idioma"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option></select>
+<button class="btn" id="theme" aria-label="Tema claro u oscuro" style="width:44px;padding:0">☾</button>
+<span id="authNav" style="display:flex;gap:8px"></span>
+<a class="btn" href="index.html" id="backLink" data-i="back">Volver al sitio</a>
+</nav></header>
+<main>
+<h1 data-i="title">Tu pronóstico de 12 semanas</h1>
+<p class="sub" data-i="subtitle">Sube tu historial y compáralo contra tu método actual. Los cálculos ocurren en tu navegador: tus datos no se envían a ningún servidor.</p>
+<div class="steps" aria-hidden="true"><span id="s1" class="on" data-i="st1">1 · Datos</span><span id="s2" data-i="st2">2 · Ajustes</span><span id="s3" data-i="st3">3 · Pronóstico</span></div>
+
+<section class="panel" id="stepLoad">
+<h2 data-i="loadT">Carga tu historial</h2>
+<p class="note" data-i="loadD">Un archivo CSV con dos columnas: fecha y valor (ventas, unidades, kilos, kWh). Mínimo 16 períodos; ideal 2 años.</p>
+<label class="drop" id="drop" tabindex="0"><input type="file" id="file" accept=".csv,.txt,.tsv,.xlsx,.xls" hidden>
+<b data-i="dropB">Arrastra tu CSV aquí o haz clic para elegirlo</b><br><span class="note" data-i="dropS">También puedes pegar los datos abajo</span></label>
+<p class="note" style="margin-top:10px"><span data-i="xlsxNote">Aceptamos CSV y Excel (.xlsx).</span> <a href="plantilla-prevo.csv" download data-i="tpl">Descargar plantilla</a></p>
+<details style="margin-top:14px"><summary data-i="pasteT">Pegar datos desde Excel</summary>
+<textarea id="paste" rows="6" style="width:100%;margin-top:10px" placeholder="2025-01-06;1250&#10;2025-01-13;1310"></textarea>
+<button class="btn" id="usePaste" style="margin-top:8px" data-i="pasteB">Usar estos datos</button></details>
+<h3 style="margin-top:26px;font-size:18px" data-i="sampT">O prueba con un ejemplo</h3>
+<div class="samples">
+<button class="sample" data-s="dist"><b data-i="s1t">Distribuidor mayorista</b><small data-i="s1d">Ventas semanales, 2 años, con temporada de fin de año</small></button>
+<button class="sample" data-s="rest"><b data-i="s2t">Cadena de restaurantes</b><small data-i="s2d">Clientes por día, 20 semanas, patrón semanal</small></button>
+<button class="sample" data-s="agro"><b data-i="s3t">Agroexportador</b><small data-i="s3d">Toneladas por mes, 5 años, cosecha estacional</small></button></div>
+<p class="err" id="loadErr" role="alert"></p>
+</section>
+
+<section class="panel hidden" id="myPanel"><h2 data-i="myT">Mis pronósticos</h2><div id="myList" class="note"></div></section>
+<section class="panel hidden" id="stepSet">
+<h2 data-i="setT">Ajustes</h2>
+<p class="note" id="dataInfo"></p>
+<div class="row">
+<label><span data-i="colD">Columna de fecha</span><select id="colDate"></select></label>
+<label><span data-i="colV">Columna de valor</span><select id="colVal"></select></label>
+<label><span data-i="hor">Horizonte (períodos)</span><input type="number" id="horizon" value="12" min="2" max="104"></label>
+<label><span data-i="cur">Tu método actual</span><select id="current">
+<option value="ma4" data-i="m_ma4">Promedio de los últimos 4 períodos</option>
+<option value="naive" data-i="m_naive">Repetir el último valor</option>
+<option value="snaive" data-i="m_snaive">Mismo período del ciclo anterior</option></select></label>
+</div>
+<div class="row" style="margin-top:18px"><button class="btn p" id="run" data-i="run">Calcular pronóstico</button><button class="btn" id="restart" data-i="restart">Cambiar datos</button></div>
+</section>
+
+<section id="stepRes" class="hidden">
+<div class="panel">
+<div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:start">
+<div><h2 id="resTitle" data-i="resT">Pronóstico</h2><p class="note" id="resMeta"></p></div>
+<div class="row noprint"><button class="btn" id="saveF" data-i="saveF">Guardar pronóstico</button><button class="btn" id="csv" data-i="csv">Descargar CSV</button><button class="btn" id="print" data-i="pdf">Guardar como PDF</button></div></div>
+<div class="kpis">
+<div class="kpi"><div class="v" id="kImp">—</div><div class="l" data-i="kImp">menos error vs. tu método</div></div>
+<div class="kpi"><div class="v" id="kErr">—</div><div class="l" data-i="kErr">error medio (backtest)</div></div>
+<div class="kpi"><div class="v" id="kNext">—</div><div class="l" data-i="kNext">próximo período (esperado)</div></div>
+<div class="kpi"><div class="v" id="kTot">—</div><div class="l" data-i="kTot">total del horizonte</div></div></div>
+<svg id="chart" viewBox="0 0 1000 380" role="img" aria-label="Gráfico"></svg>
+<div class="legend"><span><i style="border-color:var(--ink)"></i><span data-i="lH">Historial</span></span><span><i style="border-color:#2E3CF0;border-top-style:dashed"></i><span data-i="lF">Pronóstico Prevo</span></span><span><i style="border-color:var(--mist);border-top-width:10px"></i><span data-i="lB">Banda 80%</span></span><span><i style="border-color:var(--slate);border-top-style:dotted"></i><span data-i="lC">Tu método actual</span></span></div>
+</div>
+<div class="panel"><h2 data-i="recT">Qué hacer con este pronóstico</h2><ul class="recs" id="recs"></ul></div>
+<div class="panel"><h2 data-i="cmpT">Prueba contra el pasado</h2>
+<p class="note" id="btNote"></p>
+<div class="tw"><table id="models"></table></div></div>
+<div class="panel"><h2 data-i="tabT">Tabla del pronóstico</h2><div class="tw"><table id="fc"></table></div></div>
+<div class="panel cta noprint">
+<div><h2 style="color:#fff" data-i="ctaT">¿Quieres el reporte completo revisado por nuestro equipo?</h2>
+<p class="note" data-i="ctaD">Revisamos tus datos, probamos modelos de base abiertos (TimesFM, Chronos), agregamos factores como feriados y promociones, y te entregamos el reporte en 48 horas.</p></div>
+<form id="lead" style="display:grid;gap:10px" novalidate>
+<input type="email" id="email" required placeholder="tu@empresa.com" aria-label="Email" autocomplete="email">
+<input type="text" id="company" placeholder="Empresa" aria-label="Empresa" data-ph="phCo" autocomplete="organization">
+<input type="text" id="hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+<button class="btn buyb" type="button" data-plan="founders" style="background:#FFB020;border-color:#FFB020;color:#0E1630"><span data-i="ctaB1">Reporte completo</span>&nbsp;·&nbsp;<span data-price="founders">$99</span></button>
+<button class="btn buyb" type="button" data-plan="monthly" style="background:transparent;border-color:#CBD2FF;color:#fff"><span data-i="ctaB2">Plan mensual</span>&nbsp;·&nbsp;<span data-price="monthly">$199</span><span data-i="perMo">/mes</span></button>
+<span class="note" data-i="ctaN">Precio de fundadores para los primeros 5 negocios.</span></form>
+</div>
+</section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const C=Prevo.C;
+window.addEventListener('error',e=>{e.preventDefault();return true});
+// ====== I18N ======
+const T={
+es:{tpl:'Descargar plantilla',xlsxNote:'Aceptamos CSV y Excel (.xlsx).',saveF:'Guardar pronóstico',savedF:'Pronóstico guardado en tu cuenta.',loginToSave:'Inicia sesión para guardar tus pronósticos.',myT:'Mis pronósticos',myEmpty:'Aún no has guardado pronósticos.',open:'Abrir',del:'Borrar',ctaB1:'Reporte completo',ctaB2:'Plan mensual',perMo:'/mes',errEmail:'Escribe un correo válido para enviarte el reporte.',sending:'Un momento…',payOff:'Recibimos tu pedido. Te enviamos el enlace de pago a tu correo en menos de 24 horas.',xlsxErr:'No pudimos leer el Excel. Guárdalo como CSV e inténtalo de nuevo.',loading:'Leyendo archivo…',runErr:'Algo falló al calcular. Revisa que la columna de valor tenga solo números.',fewWarn:'Con menos de 2 ciclos completos no podemos detectar estacionalidad; el pronóstico será más conservador.',back:'Volver al sitio',title:'Tu pronóstico de 12 semanas',subtitle:'Sube tu historial y compáralo contra tu método actual. Los cálculos ocurren en tu navegador: tus datos no se envían a ningún servidor.',st1:'1 · Datos',st2:'2 · Ajustes',st3:'3 · Pronóstico',loadT:'Carga tu historial',loadD:'Un archivo CSV con dos columnas: fecha y valor (ventas, unidades, kilos, kWh). Mínimo 16 períodos; ideal 2 años.',dropB:'Arrastra tu CSV aquí o haz clic para elegirlo',dropS:'También puedes pegar los datos abajo',pasteT:'Pegar datos desde Excel',pasteB:'Usar estos datos',sampT:'O prueba con un ejemplo',s1t:'Distribuidor mayorista',s1d:'Ventas semanales, 2,5 años, con temporada de fin de año',s2t:'Cadena de restaurantes',s2d:'Clientes por día, 20 semanas, patrón semanal',s3t:'Agroexportador',s3d:'Toneladas por mes, 5 años, cosecha estacional',setT:'Ajustes',colD:'Columna de fecha',colV:'Columna de valor',hor:'Horizonte (períodos)',cur:'Tu método actual',m_ma4:'Promedio de los últimos 4 períodos',m_naive:'Repetir el último valor',m_snaive:'Mismo período del ciclo anterior',run:'Calcular pronóstico',restart:'Cambiar datos',resT:'Pronóstico',csv:'Descargar CSV',pdf:'Guardar como PDF',kImp:'menos error vs. tu método',kErr:'error medio (backtest)',kNext:'próximo período (esperado)',kTot:'total del horizonte',lH:'Historial',lF:'Pronóstico Prevo',lB:'Banda 80%',lC:'Tu método actual',recT:'Qué hacer con este pronóstico',cmpT:'Prueba contra el pasado',tabT:'Tabla del pronóstico',ctaT:'¿Quieres el reporte completo revisado por nuestro equipo?',ctaD:'Revisamos tus datos, probamos modelos de base abiertos (TimesFM, Chronos), agregamos factores como feriados y promociones, y te entregamos el reporte en 48 horas.',ctaB:'Quiero el reporte · $99',ctaN:'Precio de fundadores para los primeros 5 negocios.',phCo:'Empresa',
+info:(n,f,a,b)=>`${n} períodos ${f} · de ${a} a ${b}`,freq:{D:'diarios',W:'semanales',M:'mensuales'},
+bt:(h,c)=>`Ocultamos los últimos ${h} períodos, pronosticamos con cada método y comparamos contra lo que pasó de verdad. El método ganador se usa para el pronóstico. MAPE = error porcentual medio.`,
+th:['Método','MAE','MAPE','vs. tu método'],fth:['Período','Esperado','Mínimo (P10)','Máximo (P90)','Tu método'],
+mn:{naive:'Último valor',snaive:'Ciclo anterior',ma4:'Promedio 4',ses:'Suavizado exponencial',holt:'Tendencia amortiguada',hw:'Holt-Winters estacional',ens:'Combinado Prevo'},
+meta:(m,h)=>`Método ganador: ${m} · horizonte ${h} períodos`,
+r1:(v)=>`Planifica con el valor esperado y cubre hasta ${v} unidades en el próximo período (P90) si quedarte sin stock cuesta más que sobrar.`,
+r2:(p)=>`La tendencia del horizonte es ${p>0?'al alza':'a la baja'} (${p>0?'+':''}${p}% vs. las últimas semanas). ${p>0?'Negocia volumen con proveedores ahora.':'Reduce compras para no acumular inventario.'}`,
+r3:(w)=>`El período más alto del horizonte es ${w}. Asegura personal e insumos con anticipación.`,
+r4:'La banda se abre con el tiempo: revisa el pronóstico cada semana con datos nuevos.',
+r5:(x)=>`Tu método actual tuvo ${x}% más error que Prevo en la prueba contra el pasado.`,
+r5b:'En esta serie tu método actual compite bien. Te recomendamos una revisión del equipo con variables externas.',
+errFew:'Necesitamos al menos 16 períodos con fecha y valor numérico.',errParse:'No pudimos leer fechas y valores. Revisa que el archivo tenga una columna de fecha y otra numérica.',
+thanks:'Listo. Te escribimos en menos de 24 horas.',saved:'CSV descargado'},
+en:{tpl:'Download template',xlsxNote:'We accept CSV and Excel (.xlsx).',saveF:'Save forecast',savedF:'Forecast saved to your account.',loginToSave:'Log in to save your forecasts.',myT:'My forecasts',myEmpty:'You haven’t saved any forecasts yet.',open:'Open',del:'Delete',ctaB1:'Full report',ctaB2:'Monthly plan',perMo:'/mo',errEmail:'Enter a valid email so we can send your report.',sending:'One moment…',payOff:'We got your request. We’ll email you the payment link within 24 hours.',xlsxErr:'We couldn’t read the Excel file. Save it as CSV and try again.',loading:'Reading file…',runErr:'Something failed while calculating. Check that the value column only has numbers.',fewWarn:'With fewer than 2 full cycles we can’t detect seasonality; the forecast will be more conservative.',back:'Back to site',title:'Your 12-week forecast',subtitle:'Upload your history and benchmark it against how you plan today. Everything runs in your browser: your data never leaves your computer.',st1:'1 · Data',st2:'2 · Settings',st3:'3 · Forecast',loadT:'Load your history',loadD:'A CSV file with two columns: date and value (sales, units, kilos, kWh). At least 16 periods; ideally 2 years.',dropB:'Drop your CSV here or click to choose it',dropS:'You can also paste data below',pasteT:'Paste data from Excel',pasteB:'Use this data',sampT:'Or try an example',s1t:'Wholesale distributor',s1d:'Weekly sales, 2 years, holiday peak',s2t:'Restaurant group',s2d:'Daily covers, 20 weeks, weekly pattern',s3t:'Agri exporter',s3d:'Tonnes per month, 5 years, harvest season',setT:'Settings',colD:'Date column',colV:'Value column',hor:'Horizon (periods)',cur:'How you plan today',m_ma4:'Average of the last 4 periods',m_naive:'Repeat the last value',m_snaive:'Same period last cycle',run:'Run forecast',restart:'Change data',resT:'Forecast',csv:'Download CSV',pdf:'Save as PDF',kImp:'less error than your method',kErr:'mean error (backtest)',kNext:'next period (expected)',kTot:'horizon total',lH:'History',lF:'Prevo forecast',lB:'80% band',lC:'Your current method',recT:'What to do with this forecast',cmpT:'Backtest',tabT:'Forecast table',ctaT:'Want the full report, reviewed by our team?',ctaD:'We review your data, run open foundation models (TimesFM, Chronos), add drivers like holidays and promotions, and deliver the report in 48 hours.',ctaB:'Get the report · $99',ctaN:'Founder price for the first 5 businesses.',phCo:'Company',
+info:(n,f,a,b)=>`${n} ${f} periods · ${a} to ${b}`,freq:{D:'daily',W:'weekly',M:'monthly'},
+bt:(h)=>`We hid the last ${h} periods, forecast them with each method and compared against what actually happened. The winner produces your forecast. MAPE = mean percentage error.`,
+th:['Method','MAE','MAPE','vs. your method'],fth:['Period','Expected','Low (P10)','High (P90)','Your method'],
+mn:{naive:'Last value',snaive:'Last cycle',ma4:'4-period average',ses:'Exponential smoothing',holt:'Damped trend',hw:'Seasonal Holt-Winters',ens:'Prevo blend'},
+meta:(m,h)=>`Winning method: ${m} · ${h}-period horizon`,
+r1:(v)=>`Plan on the expected value and cover up to ${v} units next period (P90) if a stockout costs more than leftover stock.`,
+r2:(p)=>`The horizon trends ${p>0?'up':'down'} (${p>0?'+':''}${p}% vs. recent periods). ${p>0?'Lock in supplier volume now.':'Cut orders to avoid excess inventory.'}`,
+r3:(w)=>`The peak period in the horizon is ${w}. Secure staff and supplies ahead of time.`,
+r4:'The band widens over time: refresh the forecast weekly with new data.',
+r5:(x)=>`Your current method had ${x}% more error than Prevo in the backtest.`,
+r5b:'Your current method holds up well on this series. We recommend a team review with external drivers.',
+errFew:'We need at least 16 periods with a date and a numeric value.',errParse:'We couldn’t read dates and values. Check the file has a date column and a numeric column.',
+thanks:'Done. We’ll email you within 24 hours.',saved:'CSV downloaded'},
+pt:{tpl:'Baixar modelo',xlsxNote:'Aceitamos CSV e Excel (.xlsx).',saveF:'Salvar previsão',savedF:'Previsão salva na sua conta.',loginToSave:'Entre para salvar suas previsões.',myT:'Minhas previsões',myEmpty:'Você ainda não salvou previsões.',open:'Abrir',del:'Apagar',ctaB1:'Relatório completo',ctaB2:'Plano mensal',perMo:'/mês',errEmail:'Digite um e-mail válido para enviarmos o relatório.',sending:'Um momento…',payOff:'Recebemos seu pedido. Enviamos o link de pagamento por e-mail em até 24 horas.',xlsxErr:'Não conseguimos ler o Excel. Salve como CSV e tente de novo.',loading:'Lendo arquivo…',runErr:'Algo falhou no cálculo. Verifique se a coluna de valor tem só números.',fewWarn:'Com menos de 2 ciclos completos não detectamos sazonalidade; a previsão será mais conservadora.',back:'Voltar ao site',title:'Sua previsão de 12 semanas',subtitle:'Envie seu histórico e compare com o seu método atual. Os cálculos acontecem no seu navegador: seus dados não vão para nenhum servidor.',st1:'1 · Dados',st2:'2 · Ajustes',st3:'3 · Previsão',loadT:'Envie seu histórico',loadD:'Um arquivo CSV com duas colunas: data e valor (vendas, unidades, quilos, kWh). Mínimo 16 períodos; ideal 2 anos.',dropB:'Arraste seu CSV aqui ou clique para escolher',dropS:'Você também pode colar os dados abaixo',pasteT:'Colar dados do Excel',pasteB:'Usar estes dados',sampT:'Ou teste com um exemplo',s1t:'Distribuidor atacadista',s1d:'Vendas semanais, 2 anos, pico de fim de ano',s2t:'Rede de restaurantes',s2d:'Clientes por dia, 20 semanas, padrão semanal',s3t:'Agroexportador',s3d:'Toneladas por mês, 5 anos, safra sazonal',setT:'Ajustes',colD:'Coluna de data',colV:'Coluna de valor',hor:'Horizonte (períodos)',cur:'Seu método atual',m_ma4:'Média dos últimos 4 períodos',m_naive:'Repetir o último valor',m_snaive:'Mesmo período do ciclo anterior',run:'Calcular previsão',restart:'Trocar dados',resT:'Previsão',csv:'Baixar CSV',pdf:'Salvar como PDF',kImp:'menos erro que seu método',kErr:'erro médio (backtest)',kNext:'próximo período (esperado)',kTot:'total do horizonte',lH:'Histórico',lF:'Previsão Prevo',lB:'Faixa 80%',lC:'Seu método atual',recT:'O que fazer com esta previsão',cmpT:'Teste com o passado',tabT:'Tabela da previsão',ctaT:'Quer o relatório completo revisado pela nossa equipe?',ctaD:'Revisamos seus dados, rodamos modelos abertos (TimesFM, Chronos), incluímos feriados e promoções e entregamos o relatório em 48 horas.',ctaB:'Quero o relatório · US$ 99',ctaN:'Preço de fundador para os 5 primeiros negócios.',phCo:'Empresa',
+info:(n,f,a,b)=>`${n} períodos ${f} · de ${a} a ${b}`,freq:{D:'diários',W:'semanais',M:'mensais'},
+bt:(h)=>`Escondemos os últimos ${h} períodos, previmos com cada método e comparamos com o que realmente aconteceu. O vencedor gera sua previsão. MAPE = erro percentual médio.`,
+th:['Método','MAE','MAPE','vs. seu método'],fth:['Período','Esperado','Mínimo (P10)','Máximo (P90)','Seu método'],
+mn:{naive:'Último valor',snaive:'Ciclo anterior',ma4:'Média 4',ses:'Suavização exponencial',holt:'Tendência amortecida',hw:'Holt-Winters sazonal',ens:'Combinado Prevo'},
+meta:(m,h)=>`Método vencedor: ${m} · horizonte de ${h} períodos`,
+r1:(v)=>`Planeje com o valor esperado e cubra até ${v} unidades no próximo período (P90) se a ruptura custa mais que a sobra.`,
+r2:(p)=>`A tendência do horizonte é de ${p>0?'alta':'queda'} (${p>0?'+':''}${p}% vs. as últimas semanas). ${p>0?'Negocie volume com fornecedores agora.':'Reduza compras para não acumular estoque.'}`,
+r3:(w)=>`O pico do horizonte é ${w}. Garanta equipe e insumos com antecedência.`,
+r4:'A faixa se abre com o tempo: atualize a previsão toda semana com dados novos.',
+r5:(x)=>`Seu método atual teve ${x}% mais erro que a Prevo no teste com o passado.`,
+r5b:'Seu método atual vai bem nesta série. Recomendamos uma revisão da equipe com variáveis externas.',
+errFew:'Precisamos de pelo menos 16 períodos com data e valor numérico.',errParse:'Não conseguimos ler datas e valores. Verifique se o arquivo tem uma coluna de data e uma numérica.',
+thanks:'Pronto. Escrevemos em até 24 horas.',saved:'CSV baixado'},
+fr:{tpl:'Télécharger le modèle',xlsxNote:'Nous acceptons CSV et Excel (.xlsx).',saveF:'Enregistrer la prévision',savedF:'Prévision enregistrée dans votre compte.',loginToSave:'Connectez-vous pour enregistrer vos prévisions.',myT:'Mes prévisions',myEmpty:'Aucune prévision enregistrée pour l’instant.',open:'Ouvrir',del:'Supprimer',ctaB1:'Rapport complet',ctaB2:'Offre mensuelle',perMo:'/mois',errEmail:'Saisissez un e-mail valide pour recevoir le rapport.',sending:'Un instant…',payOff:'Demande reçue. Nous vous envoyons le lien de paiement par e-mail sous 24 h.',xlsxErr:'Impossible de lire le fichier Excel. Enregistrez-le en CSV et réessayez.',loading:'Lecture du fichier…',runErr:'Le calcul a échoué. Vérifiez que la colonne valeur ne contient que des chiffres.',fewWarn:'Avec moins de 2 cycles complets, la saisonnalité n’est pas détectable ; la prévision sera plus prudente.',back:'Retour au site',title:'Votre prévision sur 12 semaines',subtitle:'Importez votre historique et comparez-le à votre méthode actuelle. Tout est calculé dans votre navigateur : vos données ne quittent pas votre ordinateur.',st1:'1 · Données',st2:'2 · Réglages',st3:'3 · Prévision',loadT:'Importez votre historique',loadD:'Un fichier CSV avec deux colonnes : date et valeur (ventes, unités, kilos, kWh). Au moins 16 périodes ; idéalement 2 ans.',dropB:'Déposez votre CSV ici ou cliquez pour le choisir',dropS:'Vous pouvez aussi coller les données ci-dessous',pasteT:'Coller depuis Excel',pasteB:'Utiliser ces données',sampT:'Ou essayez un exemple',s1t:'Grossiste distributeur',s1d:'Ventes hebdomadaires, 2 ans, pic de fin d’année',s2t:'Groupe de restaurants',s2d:'Couverts par jour, 20 semaines, cycle hebdomadaire',s3t:'Exportateur agricole',s3d:'Tonnes par mois, 5 ans, saison de récolte',setT:'Réglages',colD:'Colonne date',colV:'Colonne valeur',hor:'Horizon (périodes)',cur:'Votre méthode actuelle',m_ma4:'Moyenne des 4 dernières périodes',m_naive:'Répéter la dernière valeur',m_snaive:'Même période du cycle précédent',run:'Calculer la prévision',restart:'Changer de données',resT:'Prévision',csv:'Télécharger le CSV',pdf:'Enregistrer en PDF',kImp:'d’erreur en moins vs. votre méthode',kErr:'erreur moyenne (backtest)',kNext:'prochaine période (attendue)',kTot:'total de l’horizon',lH:'Historique',lF:'Prévision Prevo',lB:'Fourchette 80 %',lC:'Votre méthode actuelle',recT:'Que faire de cette prévision',cmpT:'Test sur l’historique',tabT:'Tableau de prévision',ctaT:'Vous voulez le rapport complet revu par notre équipe ?',ctaD:'Nous vérifions vos données, utilisons des modèles ouverts (TimesFM, Chronos), ajoutons jours fériés et promotions, et livrons le rapport en 48 h.',ctaB:'Je veux le rapport · 99 $',ctaN:'Prix fondateur pour les 5 premières entreprises.',phCo:'Entreprise',
+info:(n,f,a,b)=>`${n} périodes ${f} · du ${a} au ${b}`,freq:{D:'journalières',W:'hebdomadaires',M:'mensuelles'},
+bt:(h)=>`Nous avons masqué les ${h} dernières périodes, les avons prévues avec chaque méthode et comparées à la réalité. La meilleure produit votre prévision. MAPE = erreur moyenne en pourcentage.`,
+th:['Méthode','MAE','MAPE','vs. votre méthode'],fth:['Période','Attendu','Bas (P10)','Haut (P90)','Votre méthode'],
+mn:{naive:'Dernière valeur',snaive:'Cycle précédent',ma4:'Moyenne 4',ses:'Lissage exponentiel',holt:'Tendance amortie',hw:'Holt-Winters saisonnier',ens:'Mélange Prevo'},
+meta:(m,h)=>`Méthode gagnante : ${m} · horizon de ${h} périodes`,
+r1:(v)=>`Planifiez sur la valeur attendue et couvrez jusqu’à ${v} unités la prochaine période (P90) si une rupture coûte plus qu’un surstock.`,
+r2:(p)=>`L’horizon est orienté à la ${p>0?'hausse':'baisse'} (${p>0?'+':''}${p} % vs. les dernières périodes). ${p>0?'Négociez les volumes fournisseurs dès maintenant.':'Réduisez les commandes pour éviter le surstock.'}`,
+r3:(w)=>`Le pic de l’horizon est ${w}. Prévoyez personnel et fournitures à l’avance.`,
+r4:'La fourchette s’élargit avec le temps : mettez la prévision à jour chaque semaine.',
+r5:(x)=>`Votre méthode actuelle a eu ${x} % d’erreur de plus que Prevo sur l’historique.`,
+r5b:'Votre méthode actuelle tient bien sur cette série. Nous recommandons une revue avec des variables externes.',
+errFew:'Il faut au moins 16 périodes avec une date et une valeur numérique.',errParse:'Impossible de lire dates et valeurs. Vérifiez la présence d’une colonne date et d’une colonne numérique.',
+thanks:'C’est noté. Réponse sous 24 h.',saved:'CSV téléchargé'}};
+let L='es';
+function t(k){return T[L][k]}
+function applyLang(){try{applyLangInner()}catch(err){console.warn(err)}}
+function applyLangInner(){document.documentElement.lang=L;document.querySelectorAll('[data-i]').forEach(e=>{const v=T[L][e.dataset.i];if(typeof v==='string')e.textContent=v});document.querySelectorAll('[data-ph]').forEach(e=>e.placeholder=T[L][e.dataset.ph]);document.querySelectorAll('[data-price]').forEach(e=>e.textContent=money((C.prices||{})[e.dataset.price]||99));$('#backLink').href=Prevo.link('index.html');$('#logo').href=Prevo.link('index.html');Prevo.renderAuth($('#authNav'),{logout:true,next:'app.html'});if(state.res)render();if(state.series)info();loadMine()}
+const money=v=>L=='fr'?v+' $':(L=='pt'?'US$ '+v:'$'+v);
+// ====== STATE ======
+const state={rows:null,cols:[],series:null,res:null,freq:'W'};
+const $=s=>document.querySelector(s);
+const store=Prevo.store;
+function toast(m,ms){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),ms||2600)}
+// ====== PARSING ======
+function splitLine(l,d){const out=[];let cur='',q=false;for(const ch of l){if(ch=='"'){q=!q;continue}if(ch==d&&!q){out.push(cur.trim());cur=''}else cur+=ch}out.push(cur.trim());return out}
+function parseCSV(text){text=text.replace(/^\uFEFF/,'').trim();const lines=text.split(/\r?\n/).filter(l=>l.trim());if(!lines.length)return null;
+const cand=['\t',';',','];let d=cand.find(c=>lines[0].split(c).length>1)||',';
+let rows=lines.map(l=>splitLine(l,d));const header=rows[0].some(c=>isNaN(num(c))&&!parseDate(c));
+const cols=header?rows[0]:rows[0].map((_,i)=>'col'+(i+1));if(header)rows=rows.slice(1);return{cols,rows}}
+function num(s){if(s==null)return NaN;s=String(s).replace(/[^\d,.\-]/g,'');if(!s)return NaN;
+if(s.includes(',')&&s.includes('.')){s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'')}else if(s.includes(',')){const p=s.split(',');s=p.length==2&&p[1].length!=3?s.replace(',','.'):s.replace(/,/g,'')}return parseFloat(s)}
+const MONTHS={ene:0,jan:0,janv:0,feb:1,fev:1,fevr:1,mar:2,mars:2,abr:3,apr:3,avr:3,may:4,mai:4,jun:5,juin:5,jul:6,juil:6,ago:7,aug:7,aou:7,sep:8,set:8,sept:8,oct:9,out:9,nov:10,dic:11,dec:11,dez:11};
+function monthIdx(w){w=w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f.]/g,'');return MONTHS[w.slice(0,4)]??MONTHS[w.slice(0,3)]}
+function yr(y){y=+y;return y<100?(y<70?2000+y:1900+y):y}
+function parseDate(s){if(s==null||s==='')return null;if(s instanceof Date)return isNaN(s)?null:new Date(Date.UTC(s.getFullYear(),s.getMonth(),s.getDate()));s=String(s).trim();let m;
+if(m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))return new Date(Date.UTC(+m[1],m[2]-1,+m[3]));
+if(m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2}|\d{4})(?!\d)/)){let a=+m[1],b=+m[2];if(a<=12&&b>12)[a,b]=[b,a];if(b<1||b>12||a<1||a>31)return null;return new Date(Date.UTC(yr(m[3]),b-1,a))}
+if(m=s.match(/^(\d{4})[-\/.](\d{1,2})$/))return +m[2]>=1&&+m[2]<=12?new Date(Date.UTC(+m[1],m[2]-1,1)):null;
+if(m=s.match(/^(\d{1,2})[-\/.](\d{4})$/))return +m[1]>=1&&+m[1]<=12?new Date(Date.UTC(+m[2],m[1]-1,1)):null;
+if(m=s.match(/^(?:(\d{1,2})[\s\-\/]+)?([A-Za-zÀ-ÿ.]{3,10})[\s\-\/,]+(\d{2}|\d{4})$/)){const mi=monthIdx(m[2]);if(mi!=null)return new Date(Date.UTC(yr(m[3]),mi,m[1]?+m[1]:1))}
+if(m=s.match(/^(\d{4})[\s\-\/]+([A-Za-zÀ-ÿ.]{3,10})$/)){const mi=monthIdx(m[2]);if(mi!=null)return new Date(Date.UTC(+m[1],mi,1))}
+return null}
+function loadText(text){$('#loadErr').textContent='';const p=parseCSV(text);if(!p||!p.rows.length){$('#loadErr').textContent=t('errParse');return}
+state.rows=p.rows;state.cols=p.cols;
+const dIdx=p.cols.findIndex((_,i)=>p.rows.slice(0,10).filter(r=>parseDate(r[i])).length>=Math.min(5,p.rows.length));
+let vIdx=p.cols.findIndex((_,i)=>i!=dIdx&&p.rows.slice(0,10).filter(r=>!isNaN(num(r[i]))).length>=Math.min(5,p.rows.length));
+if(dIdx<0||vIdx<0){$('#loadErr').textContent=t('errParse');return}
+$('#colDate').innerHTML=p.cols.map((c,i)=>`<option value="${i}">${esc(c)}</option>`).join('');$('#colVal').innerHTML=$('#colDate').innerHTML;
+$('#colDate').value=dIdx;$('#colVal').value=vIdx;if(!build())return;go(2)}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function build(){const di=+$('#colDate').value,vi=+$('#colVal').value;const pts=state.rows.map(r=>({d:parseDate(r[di]),v:num(r[vi])})).filter(p=>p.d&&!isNaN(p.v)).sort((a,b)=>a.d-b.d);
+if(pts.length<16){$('#loadErr').textContent=t('errFew');go(1);return false}
+const gaps=pts.slice(1).map((p,i)=>(p.d-pts[i].d)/864e5).sort((a,b)=>a-b);const g=gaps[gaps.length>>1];
+state.freq=g<=2?'D':g<=10?'W':'M';
+// aggregate duplicates (same period)
+const key=d=>state.freq=='M'?d.toISOString().slice(0,7):d.toISOString().slice(0,10);const map=new Map();pts.forEach(p=>{const k=key(p.d);map.set(k,{d:map.get(k)?.d||p.d,v:(map.get(k)?.v||0)+p.v})});
+state.series=[...map.values()];info();return true}
+function info(){const s=state.series,f=d=>fmtDate(d);const need={D:14,W:104,M:24}[state.freq];$('#dataInfo').textContent=T[L].info(s.length,T[L].freq[state.freq],f(s[0].d),f(s[s.length-1].d))+(s.length<need?' · '+T[L].fewWarn:'')}
+function fmtDate(d){return d.toLocaleDateString(L,{timeZone:'UTC',year:'numeric',month:'short',day:state.freq=='M'?undefined:'numeric'})}
+function addPeriod(d,k){const n=new Date(d);if(state.freq=='M')n.setUTCMonth(n.getUTCMonth()+k);else n.setUTCDate(n.getUTCDate()+k*(state.freq=='D'?1:7));return n}
+// ====== MODELS ======
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+function detr(y){const n=y.length,xm=(n-1)/2,ym=mean(y);let a=0,b=0;y.forEach((v,i)=>{a+=(i-xm)*(v-ym);b+=(i-xm)**2});const sl=a/b;return y.map((v,i)=>v-ym-sl*(i-xm))}
+function seasonLen(y){const cands=state.freq=='D'?[7]:state.freq=='W'?[52,4]:[12];const z=detr(y);for(const m of cands){if(y.length>=2*m+4&&acf(z,m)>0.25)return m}return 0}
+function acf(y,k){const m=mean(y);let n=0,d=0;for(let i=0;i<y.length;i++){d+=(y[i]-m)**2;if(i>=k)n+=(y[i]-m)*(y[i-k]-m)}return d?n/d:0}
+const F={
+naive:(y,h)=>Array(h).fill(y[y.length-1]),
+ma4:(y,h)=>Array(h).fill(mean(y.slice(-4))),
+snaive:(y,h,m)=>{m=m||(state.freq=='D'?7:state.freq=='W'?52:12);if(y.length<m)return F.naive(y,h);return Array.from({length:h},(_,i)=>y[y.length-m+(i%m)])},
+ses:(y,h)=>{let best=null;for(let a=.05;a<1;a+=.05){let l=y[0],sse=0;for(let i=1;i<y.length;i++){sse+=(y[i]-l)**2;l=a*y[i]+(1-a)*l}if(!best||sse<best.sse)best={sse,l}}return Array(h).fill(best.l)},
+holt:(y,h)=>{let best=null;for(const a of [.1,.2,.3,.5,.7,.9])for(const b of [.01,.05,.1,.2])for(const ph of [.85,.9,.95,.98]){let l=y[0],tr=y[1]-y[0],sse=0;for(let i=1;i<y.length;i++){const f=l+ph*tr;sse+=(y[i]-f)**2;const nl=a*y[i]+(1-a)*f;tr=b*(nl-l)+(1-b)*ph*tr;l=nl}if(!best||sse<best.sse)best={sse,l,tr,ph}}
+const o=[];let s=0;for(let k=1;k<=h;k++){s+=Math.pow(best.ph,k);o.push(best.l+s*best.tr)}return o},
+hw:(y,h,m)=>{if(!m||y.length<2*m)return null;let best=null;
+const init=()=>{const l=mean(y.slice(0,m));const tr=(mean(y.slice(m,2*m))-l)/m;const s=y.slice(0,m).map(v=>v-l);return{l,tr,s}};
+for(const a of [.1,.2,.3,.5,.7])for(const b of [.01,.05,.1])for(const g of [.05,.1,.2,.3])for(const ph of [.9,.98]){let{l,tr,s}=init();s=s.slice();let sse=0;
+for(let i=m;i<y.length;i++){const si=s[i%m];const f=l+ph*tr+si;sse+=(y[i]-f)**2;const nl=a*(y[i]-si)+(1-a)*(l+ph*tr);tr=b*(nl-l)+(1-b)*ph*tr;s[i%m]=g*(y[i]-nl)+(1-g)*si;l=nl}
+if(!best||sse<best.sse)best={sse,l,tr,s,ph}}
+const o=[];let c=0;for(let k=1;k<=h;k++){c+=Math.pow(best.ph,k);o.push(best.l+c*best.tr+best.s[(y.length+k-1)%m])}return o}
+};
+function run(){try{runInner()}catch(err){console.warn(err);toast(t('runErr'),5000)}}
+function runInner(){const y=state.series.map(p=>p.v),H=Math.max(2,Math.min(104,+$('#horizon').value||12));const m=seasonLen(y);
+const bh=Math.min(H,Math.max(4,Math.floor(y.length/4)));const train=y.slice(0,-bh),test=y.slice(-bh);
+const names=['naive','snaive','ma4','ses','holt','hw'];const bt={};
+names.forEach(n=>{const f=n=='snaive'?F.snaive(train,bh,m||undefined):F[n](train,bh,seasonLen(train)||m);if(f)bt[n]={f,mae:mean(f.map((v,i)=>Math.abs(v-test[i]))),mape:mape(f,test)}});
+// ensemble of top 3 statistical (excluding naive/ma4)
+let stat=Object.keys(bt).filter(k=>!['naive','ma4'].includes(k)).sort((a,b)=>bt[a].mae-bt[b].mae).slice(0,3);
+if(m){const ns=Object.keys(bt).filter(k=>['ses','holt'].includes(k)).sort((a,b)=>bt[a].mae-bt[b].mae)[0];stat=[bt.hw?'hw':null,'snaive',ns].filter(Boolean)}
+const ens=test.map((_,i)=>median(stat.map(k=>bt[k].f[i])));bt.ens={f:ens,mae:mean(ens.map((v,i)=>Math.abs(v-test[i]))),mape:mape(ens,test)};
+const cur=$('#current').value;const cands=Object.keys(bt).filter(k=>!['naive','ma4'].includes(k));let best=cands.sort((a,b)=>bt[a].mae-bt[b].mae)[0];if(bt.ens.mae<=bt[best].mae*1.05)best='ens';
+// refit on full data
+let fc;if(best=='ens'){const fs=stat.map(k=>k=='snaive'?F.snaive(y,H,m||undefined):F[k](y,H,m)).filter(Boolean);fc=Array.from({length:H},(_,i)=>median(fs.map(f=>f[i])))}else fc=best=='snaive'?F.snaive(y,H,m||undefined):F[best](y,H,m);
+const curF=cur=='snaive'?F.snaive(y,H,m||undefined):F[cur](y,H);
+const sig=Math.sqrt(mean(bt[best].f.map((v,i)=>(v-test[i])**2)));const nonneg=Math.min(...y)>=0;
+const sd1=sig/Math.sqrt((bh+1)/2);
+const lo=fc.map((v,i)=>{const r=v-1.2816*sd1*Math.sqrt(i+1);return nonneg?Math.max(0,r):r}),hi=fc.map((v,i)=>v+1.2816*sd1*Math.sqrt(i+1));
+state.res={y,H,m,bh,bt,best,cur,fc:fc.map(v=>nonneg?Math.max(0,v):v),lo,hi,curF,stat};render();go(3);
+store.set('prevo_last',JSON.stringify({n:y.length,best,when:Date.now()}))}
+function mape(f,a){const v=a.map((x,i)=>x?Math.abs((f[i]-x)/x):null).filter(x=>x!=null);return v.length?mean(v)*100:NaN}
+function median(a){const s=[...a].sort((x,y)=>x-y);return s.length%2?s[s.length>>1]:(s[s.length/2-1]+s[s.length/2])/2}
+const nf=v=>isFinite(v)?Math.round(v).toLocaleString(L):'—';
+// ====== RENDER ======
+function render(){const r=state.res,s=state.series,tx=T[L];
+const curErr=r.bt[r.cur].mae,bestErr=r.bt[r.best].mae;const imp=curErr?Math.round((1-bestErr/curErr)*100):0;
+$('#kImp').textContent=(imp>0?'−':'')+Math.abs(imp)+'%';$('#kImp').className='v '+(imp>0?'good':'bad');
+$('#kErr').textContent=isFinite(r.bt[r.best].mape)?r.bt[r.best].mape.toFixed(1)+'%':nf(bestErr);
+$('#kNext').textContent=nf(r.fc[0]);$('#kTot').textContent=nf(r.fc.reduce((a,b)=>a+b,0));
+$('#resMeta').textContent=tx.meta(tx.mn[r.best],r.H);$('#btNote').textContent=tx.bt(r.bh);
+// models table
+const rows=Object.keys(r.bt).sort((a,b)=>r.bt[a].mae-r.bt[b].mae);
+$('#models').innerHTML=`<tr>${tx.th.map(h=>`<th>${h}</th>`).join('')}</tr>`+rows.map(k=>{const d=r.bt[k],c=curErr?Math.round((d.mae/curErr-1)*100):0;return `<tr class="${k==r.best?'best':''}"><td>${tx.mn[k]}${k==r.cur?' ●':''}</td><td>${nf(d.mae)}</td><td>${isFinite(d.mape)?d.mape.toFixed(1)+'%':'—'}</td><td>${k==r.cur?'—':(c>0?'+':'')+c+'%'}</td></tr>`}).join('');
+// fc table
+const last=s[s.length-1].d;$('#fc').innerHTML=`<tr>${tx.fth.map(h=>`<th>${h}</th>`).join('')}</tr>`+r.fc.map((v,i)=>`<tr><td>${fmtDate(addPeriod(last,i+1))}</td><td>${nf(v)}</td><td>${nf(r.lo[i])}</td><td>${nf(r.hi[i])}</td><td>${nf(r.curF[i])}</td></tr>`).join('');
+// recs
+const recent=mean(r.y.slice(-Math.min(r.H,r.y.length))),fm=mean(r.fc);const pct=Math.round((fm/recent-1)*100);const pk=r.fc.indexOf(Math.max(...r.fc));
+$('#recs').innerHTML=[tx.r1(nf(r.hi[0])),Math.abs(pct)>=2?tx.r2(pct):null,tx.r3(fmtDate(addPeriod(last,pk+1))),tx.r4,imp>0?tx.r5(Math.round((curErr/bestErr-1)*100)):tx.r5b].filter(Boolean).map(x=>`<li>${x}</li>`).join('');
+drawChart()}
+function drawChart(){const r=state.res,W=1000,Hh=380,P={l:64,r:20,t:20,b:40};const show=Math.min(r.y.length,Math.max(r.H*4,52));const hist=r.y.slice(-show);const n=hist.length+r.H;
+const all=[...hist,...r.hi,...r.lo,...r.curF];let mn=Math.min(...all),mx=Math.max(...all);const pad=(mx-mn)*.08||1;mn-=pad;mx+=pad;if(Math.min(...r.y)>=0)mn=Math.max(0,mn);
+const X=i=>P.l+i*(W-P.l-P.r)/(n-1),Y=v=>P.t+(1-(v-mn)/(mx-mn))*(Hh-P.t-P.b);const css=getComputedStyle(document.documentElement);const ink=css.getPropertyValue('--ink'),line=css.getPropertyValue('--line'),slate=css.getPropertyValue('--slate'),mist=css.getPropertyValue('--mist');
+let g='';for(let k=0;k<=4;k++){const v=mn+(mx-mn)*k/4;g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${P.l-8}" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="${slate}">${nf(v)}</text>`}
+const s=state.series.slice(-show);[0,Math.floor(hist.length/2),hist.length-1].forEach(i=>g+=`<text x="${X(i)}" y="${Hh-12}" text-anchor="middle" font-size="12" fill="${slate}">${fmtDate(s[i].d)}</text>`);
+g+=`<text x="${X(n-1)}" y="${Hh-12}" text-anchor="end" font-size="12" fill="${slate}">${fmtDate(addPeriod(s[s.length-1].d,r.H))}</text>`;
+const h0=hist.length-1;const band=`M${X(h0)} ${Y(hist[h0])} `+r.hi.map((v,i)=>`L${X(h0+1+i)} ${Y(v)}`).join(' ')+' '+r.lo.map((v,i)=>[X(h0+1+i),Y(v)]).reverse().map(p=>`L${p[0]} ${p[1]}`).join(' ')+'Z';
+const path=(arr,o)=>arr.map((v,i)=>`${i?'L':'M'}${X(o+i)} ${Y(v)}`).join(' ');
+g+=`<path d="${band}" fill="${mist}" opacity=".75"/>`;
+g+=`<path d="${path([hist[h0],...r.curF],h0)}" fill="none" stroke="${slate}" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/>`;
+g+=`<path d="${path(hist,0)}" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linejoin="round"/>`;
+g+=`<path d="${path([hist[h0],...r.fc],h0)}" fill="none" stroke="#2E3CF0" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"/>`;
+g+=`<line x1="${X(h0)}" x2="${X(h0)}" y1="${P.t}" y2="${Hh-P.b}" stroke="#FFB020" stroke-dasharray="3 5"/><circle cx="${X(h0)}" cy="${Y(hist[h0])}" r="8" fill="var(--card)" stroke="#FFB020" stroke-width="4"/>`;
+$('#chart').innerHTML=g}
+// ====== FLOW ======
+function go(n){if(n!=1)$('#myPanel').classList.add('hidden');else loadMine();$('#stepLoad').classList.toggle('hidden',n!=1);$('#stepSet').classList.toggle('hidden',n!=2);$('#stepRes').classList.toggle('hidden',n!=3);
+[1,2,3].forEach(i=>{const e=$('#s'+i);e.className=i==n?'on':i<n?'done':''});if(n==3)$('#stepSet').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+// samples (deterministic)
+function rng(seed){return()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646}}
+function gauss(r){return Math.sqrt(-2*Math.log(r()))*Math.cos(2*Math.PI*r())}
+function sample(kind){const r=rng(kind.length*977+13);let out=[];if(kind=='dist'){let d=new Date(Date.UTC(2024,4,20));for(let i=0;i<130;i++){const wk=(d-Date.UTC(d.getUTCFullYear(),0,1))/6048e5;const dd=Math.min(Math.abs(wk-50),52-Math.abs(wk-50));const v=1150+i*3+380*Math.exp(-(dd**2)/5)+90*Math.sin(2*Math.PI*(wk-10)/52)+gauss(r)*32;out.push([d.toISOString().slice(0,10),Math.round(v)]);d.setUTCDate(d.getUTCDate()+7)}}
+else if(kind=='rest'){let d=new Date(Date.UTC(2026,5,22));const dow=[.8,.75,.85,.95,1.3,1.55,1.2];for(let i=0;i<140;i++){out.push([d.toISOString().slice(0,10),Math.round((310+i*.4)*dow[i%7]+gauss(r)*18)]);d.setUTCDate(d.getUTCDate()+1)}}
+else{for(let i=0;i<60;i++){const mth=i%12;const v=420+i*3+380*Math.max(0,Math.sin(Math.PI*(mth-8)/6))+gauss(r)*35;out.push([`${2021+Math.floor(i/12)}-${String(mth+1).padStart(2,'0')}`,Math.max(0,Math.round(v))])}}
+const hd={dist:'fecha;unidades',rest:'fecha;clientes',agro:'mes;toneladas'}[kind];loadText(hd+'\n'+out.map(x=>x.join(';')).join('\n'));if(kind!='dist')$('#current').value='ma4'}
+// events
+const dark=()=>document.documentElement.dataset.theme=='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);
+function setLogo(){$('#logo').innerHTML=Prevo.logo(dark()?'negative':'positive',30)}setLogo();if(!Prevo.sb)$('#saveF').classList.add('hidden');Prevo.onAuth(()=>{Prevo.renderAuth($('#authNav'),{logout:true,next:'app.html'});loadMine()});
+$('#theme').onclick=()=>{document.documentElement.dataset.theme=dark()?'light':'dark';setLogo();if(state.res)drawChart()};
+function loadScript(src){return new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=ko;document.head.appendChild(s)})}
+async function handleFile(f){if(!f)return;$('#loadErr').textContent='';
+if(/\.xlsx?$/i.test(f.name)){toast(t('loading'));try{if(!window.XLSX)await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];
+const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,blankrows:false});
+const iso=d=>{const x=new Date(d.getTime()+43200000);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+loadText(rows.filter(r=>r&&r.length).map(r=>r.map(c=>c instanceof Date?iso(c):String(c==null?'':c).replace(/;/g,' ')).join(';')).join('\n'))}catch(err){console.warn(err);$('#loadErr').textContent=t('xlsxErr')}}
+else{try{loadText(await f.text())}catch(_){$('#loadErr').textContent=t('errParse')}}}
+$('#file').onchange=e=>{handleFile(e.target.files[0]);e.target.value=''};
+const dz=$('#drop');['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
+dz.addEventListener('drop',e=>{handleFile(e.dataTransfer.files[0])});dz.addEventListener('keydown',e=>{if(e.key=='Enter'||e.key==' '){e.preventDefault();$('#file').click()}});
+$('#usePaste').onclick=()=>loadText($('#paste').value);
+document.querySelectorAll('.sample').forEach(b=>b.onclick=()=>sample(b.dataset.s));
+$('#colDate').onchange=$('#colVal').onchange=build;
+$('#run').onclick=run;$('#restart').onclick=()=>{state.res=null;go(1)};
+$('#csv').onclick=()=>{const r=state.res,last=state.series[state.series.length-1].d;const lines=['period,expected,p10,p90,current_method',...r.fc.map((v,i)=>[addPeriod(last,i+1).toISOString().slice(0,10),v.toFixed(2),r.lo[i].toFixed(2),r.hi[i].toFixed(2),r.curF[i].toFixed(2)].join(','))];
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));a.download='prevo-forecast.csv';a.click();toast(t('saved'))};
+$('#print').onclick=()=>window.print();
+$('#lead').onsubmit=e=>e.preventDefault();
+document.querySelectorAll('.buyb').forEach(btn=>btn.onclick=async()=>{const email=$('#email').value.trim();if(!Prevo.emailOk(email)){toast(t('errEmail'));$('#email').focus();return}
+const plan=btn.dataset.plan,r=state.res;const meta=r?{best:r.best,n:r.y.length,freq:state.freq,h:r.H,improvement:Math.round((1-r.bt[r.best].mae/(r.bt[r.cur].mae||1))*100)}:{};
+document.querySelectorAll('.buyb').forEach(b=>b.disabled=true);toast(t('sending'));
+await Prevo.saveLead({email,company:$('#company').value.trim()||null,plan,source:'app-report',meta,_hp:$('#hp').value});
+const res=await Prevo.checkout(plan,{email,medium:'app',meta});
+document.querySelectorAll('.buyb').forEach(b=>b.disabled=false);
+if(!res.ok)toast(t('payOff'),6000)});
+// ====== cuenta: guardar y abrir pronósticos ======
+$('#saveF').onclick=async()=>{const u=await Prevo.getUser();if(!u||!Prevo.sb){toast(t('loginToSave'),3500);setTimeout(()=>location.href=Prevo.link('login.html',{next:'app.html'}),1200);return}
+const r=state.res;const series=state.series.slice(-1500).map(p=>[p.d.toISOString().slice(0,10),p.v]);
+const {error}=await Prevo.sb.from(Prevo.table('forecasts')).insert({name:($('#colVal').selectedOptions[0]||{}).text+' · '+fmtDate(state.series[state.series.length-1].d),freq:state.freq,horizon:r.H,best_method:r.best,improvement:Math.round((1-r.bt[r.best].mae/(r.bt[r.cur].mae||1))*100),mape:isFinite(r.bt[r.best].mape)?+r.bt[r.best].mape.toFixed(2):null,data:{series,current:r.cur,col:($('#colVal').selectedOptions[0]||{}).text}});
+toast(error?t('runErr'):t('savedF'));loadMine()};
+async function loadMine(){const u=await Prevo.getUser();const p=$('#myPanel');if(!u||!Prevo.sb){p.classList.add('hidden');return}
+if($('#stepLoad').classList.contains('hidden'))p.classList.add('hidden');else p.classList.remove('hidden');
+const {data,error}=await Prevo.sb.from(Prevo.table('forecasts')).select('id,created_at,name,best_method,improvement').order('created_at',{ascending:false}).limit(20);
+if(error||!data||!data.length){$('#myList').textContent=t('myEmpty');return}
+$('#myList').innerHTML='<div class="tw"><table>'+data.map(f=>`<tr><td>${esc(f.name||'—')}</td><td>${new Date(f.created_at).toLocaleDateString(L)}</td><td>${f.improvement!=null?(f.improvement>0?'−':'+')+Math.abs(f.improvement)+'%':''}</td><td><button class="btn" data-open="${f.id}">${t('open')}</button> <button class="btn" data-del="${f.id}">${t('del')}</button></td></tr>`).join('')+'</table></div>'}
+$('#myList').addEventListener('click',async e=>{const o=e.target.dataset.open,d=e.target.dataset.del;
+if(o){const {data}=await Prevo.sb.from(Prevo.table('forecasts')).select('data').eq('id',o).limit(1);const f=data&&data[0];if(!f)return;loadText('fecha;'+(f.data.col||'valor')+'\n'+f.data.series.map(x=>x.join(';')).join('\n'));if(f.data.current)$('#current').value=f.data.current;run()}
+if(d){await Prevo.sb.from(Prevo.table('forecasts')).delete().eq('id',d);loadMine()}});
+$('#lang').onchange=e=>{L=e.target.value;Prevo.setLang(L);applyLang()};
+(async function(){let l=Prevo.getLang();const u=await Prevo.getUser();if(u&&u.email)$('#email').value=u.email;L=l;$('#lang').value=l;applyLang();
+const s=new URLSearchParams(location.search).get('sample');if(s)sample(s)})();
+</script></body></html>

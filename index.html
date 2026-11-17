@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prevo — Tus próximas 12 semanas, hoy</title>
+<meta name="description" content="Pronósticos de demanda en 48 horas para negocios con inventario, comparados contra tu método actual.">
+<meta property="og:title" content="Prevo — Your next 12 weeks, today"><meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0E1630;--ultra:#2E3CF0;--mist:#CBD2FF;--saffron:#FFB020;--paper:#F3F4F7;--slate:#5B6478;--line:#D9DCE4;--card:#fff;
+--display:'Bricolage Grotesque','Avenir Next','Segoe UI',sans-serif;--body:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#0B1124;--ink:#E9ECF5;--card:#131B33;--line:#26304D;--slate:#9AA3BB;--mist:#3A4890;color-scheme:dark}}
+:root[data-theme=dark]{--paper:#0B1124;--ink:#E9ECF5;--card:#131B33;--line:#26304D;--slate:#9AA3BB;--mist:#3A4890;color-scheme:dark}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-behavior:smooth;scroll-padding-top:calc(80px + env(safe-area-inset-top,0px))}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--paper)}
+:focus-visible{outline:3px solid var(--saffron);outline-offset:3px}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.025em}
+.wrap{max-width:1240px;margin:0 auto;padding:0 5vw}
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;gap:20px}
+.nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:15px}
+.nav ul a{text-decoration:none;color:var(--slate)}.nav ul a:hover{color:var(--ink)}
+.nav .r{display:flex;gap:10px;align-items:center}
+.langs{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.langs button{border:0;background:none;padding:7px 10px;font:600 13px var(--body);color:var(--slate);cursor:pointer}
+.langs button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:999px;font:600 16px var(--body);text-decoration:none;cursor:pointer;border:1px solid transparent;transition:background .15s}
+.btn.p{background:#2E3CF0;color:#fff}.btn.p:hover{background:#2230d0}
+.btn.s{border-color:var(--line);background:var(--card);color:var(--ink)}
+.btn.y{background:#FFB020;color:#0E1630}
+.btn.sm{padding:9px 16px;font-size:14px}
+/* hero */
+.hero{padding:9vh 0 0;position:relative}
+.hero h1{font-size:clamp(48px,8.4vw,128px);line-height:.93;font-weight:800;letter-spacing:-.045em;max-width:11ch}
+.hero p.lead{font-size:clamp(18px,1.6vw,22px);color:var(--slate);max-width:44ch;margin:28px 0 30px}
+.hero .ctas{display:flex;gap:12px;flex-wrap:wrap}
+.hero .trust{margin-top:18px;font-size:14px;color:var(--slate);display:flex;gap:8px;align-items:center}
+.fanwrap{margin-top:7vh;position:relative}
+#fan{width:100%;height:auto;display:block}
+#fan .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 1.6s cubic-bezier(.6,0,.2,1) forwards}
+#fan .cone{opacity:0;transform-origin:50% 50%;animation:fade .9s 1.5s forwards}
+#fan .now{opacity:0;animation:fade .3s 1.4s forwards}
+#fan .fdash{opacity:0;animation:fade .6s 1.9s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}@keyframes fade{to{opacity:1}}
+.flabels{display:flex;justify-content:space-between;font-size:13px;color:var(--slate);border-top:1px solid var(--line);padding:10px 0 0}
+/* marquee */
+.marquee{border-block:1px solid var(--line);overflow:hidden;padding:22px 0;margin-top:70px}
+.track{display:flex;gap:56px;width:max-content;animation:scroll 48s linear infinite;font:700 clamp(28px,3.6vw,52px)/1 var(--display);letter-spacing:-.03em}
+.track span{display:flex;align-items:center;gap:56px;white-space:nowrap}
+.track span::after{content:"";width:14px;height:14px;border-radius:50%;border:4px solid #FFB020}
+.marquee:hover .track{animation-play-state:paused}
+@keyframes scroll{to{transform:translateX(-50%)}}
+/* sections */
+section.blk{padding:130px 0}
+.chap{display:grid;grid-template-columns:220px 1fr;gap:40px;align-items:start}
+.chap .k{font-size:14px;color:var(--slate);padding-top:12px;border-top:2px solid var(--ink)}
+h2.big{font-size:clamp(38px,5.2vw,78px);line-height:1;font-weight:700;max-width:15ch}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:60px;border-top:1px solid var(--line)}
+.pgrid > div{padding:28px 28px 0 0;border-right:1px solid var(--line);margin-right:28px}
+.pgrid > div:last-child{border-right:0}
+.pgrid h3{font-size:22px;margin-bottom:10px}.pgrid p{color:var(--slate);margin:0;max-width:34ch}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:70px;border-top:2px solid var(--ink)}
+.stats>div{padding:26px 22px 26px 0;border-right:1px solid var(--line);margin-right:22px}.stats>div:last-child{border-right:0}
+.stats b{display:block;font:800 clamp(32px,3.6vw,54px)/1 var(--display);letter-spacing:-.04em;color:var(--ultra)}
+.stats p{margin:12px 0 6px;color:var(--ink);font-size:15.5px}.stats a{font-size:12.5px;color:var(--slate)}
+.solve{margin-top:70px;display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:40px;border-radius:22px;background:var(--card);border:1px solid var(--line)}
+.solve h3{font-size:clamp(26px,2.6vw,36px);line-height:1.1}.solve ul{margin:0;padding-left:20px;display:grid;gap:10px}
+@media (max-width:1000px){.stats{grid-template-columns:1fr 1fr}.stats>div{border-right:0}.solve{grid-template-columns:1fr;padding:28px}}
+/* how */
+.how{background:#0E1630;color:#F3F4F7}
+.how .k{border-color:#F3F4F7;color:#CBD2FF}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:64px;counter-reset:s}
+.step{border-top:1px solid #33406A;padding-top:22px}
+.step b{font:800 64px/1 var(--display);color:#2E3CF0;letter-spacing:-.04em;display:block;margin-bottom:22px}
+.step:nth-child(2) b{color:#FFB020}
+.step h3{font-size:24px;margin-bottom:10px}.step p{color:#B8C0DA;margin:0}
+.demo{margin-top:80px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.demo a{display:block;padding:24px;border-radius:14px;background:#17213F;text-decoration:none;border:1px solid #26304D;transition:border-color .2s}
+.demo a:hover{border-color:#CBD2FF}
+.demo strong{font:700 20px var(--display);display:block;margin:12px 0 4px}.demo small{color:#9AA3BB}
+/* cases */
+.cases{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:60px}
+.case{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:32px;display:flex;flex-direction:column;gap:14px}
+.case h3{font-size:26px}.case p{margin:0;color:var(--slate)}
+.case .r{display:flex;gap:28px;margin-top:auto;padding-top:18px;border-top:1px solid var(--line);font-size:14px;color:var(--slate)}
+.case .r b{display:block;font:700 22px var(--display);color:var(--ink)}
+/* pricing */
+.prices{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px;align-items:stretch}
+.price{border:1px solid var(--line);border-radius:18px;padding:32px;background:var(--card);display:flex;flex-direction:column}
+.price.f{background:#2E3CF0;color:#fff;border-color:#2E3CF0}
+.price h3{font-size:22px}.price .amt{font:800 56px/1 var(--display);letter-spacing:-.04em;margin:20px 0 4px}
+.price .amt s{font-size:24px;opacity:.55;font-weight:500;margin-left:8px}
+.price .per{font-size:14px;opacity:.75}
+.price ul{padding:0;list-style:none;margin:24px 0 28px;display:grid;gap:10px;font-size:15px}
+.price li{display:flex;gap:10px}.price li::before{content:"";flex:none;width:8px;height:8px;margin-top:8px;border-radius:50%;border:2.5px solid currentColor}
+.price .btn{margin-top:auto}
+.price.f .note{color:#CBD2FF}
+.note{font-size:13px;color:var(--slate)}
+/* compare */
+.tw{overflow-x:auto;margin-top:50px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:15px}
+th,td{padding:16px 14px;border-bottom:1px solid var(--line);text-align:left}
+th{font-weight:600;color:var(--slate);font-size:14px}
+td.us{background:rgba(46,60,240,.08);font-weight:600}
+/* faq */
+details{border-bottom:1px solid var(--line);padding:22px 0}
+summary{cursor:pointer;font:600 20px/1.3 var(--display);list-style:none;display:flex;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:28px;line-height:1;color:var(--ultra);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{color:var(--slate);max-width:64ch;margin:14px 0 0}
+/* final */
+.final{background:#2E3CF0;color:#fff;border-radius:28px;padding:70px 6vw;display:grid;grid-template-columns:1.2fr 1fr;gap:50px;align-items:center;margin:0 5vw 100px}
+.final h2{font-size:clamp(36px,4.6vw,64px);line-height:1;font-weight:800}
+.final form{display:grid;gap:12px}
+.final input,.final select{padding:14px 16px;border-radius:12px;border:0;font:inherit;background:#fff;color:#0E1630}
+.final .note{color:#DCE0FF}
+footer{border-top:1px solid var(--line);padding:50px 0 calc(40px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--slate)}
+footer .wrap{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
+footer h4{color:var(--ink);font:600 14px var(--body);margin:0 0 12px}
+footer a{display:block;text-decoration:none;margin-bottom:8px}footer a:hover{color:var(--ink)}
+.toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#0E1630;color:#fff;padding:14px 20px;border-radius:12px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:40}.toast.on{opacity:1}
+.menu{display:none}
+@media (max-width:1000px){.nav ul{display:none}.chap{grid-template-columns:1fr;gap:18px}.pgrid,.steps,.prices,.demo{grid-template-columns:1fr}.pgrid>div{border-right:0;margin:0;border-bottom:1px solid var(--line);padding-bottom:24px}.cases{grid-template-columns:1fr}.final{grid-template-columns:1fr}footer .wrap{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.nav .r a.mvp{display:none}.final{margin:0 3vw 60px;padding:48px 24px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#fan .draw{stroke-dashoffset:0}#fan .cone,#fan .now,#fan .fdash{opacity:1}}
+</style><script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script src="assets/prevo.js"></script>
+</head><body>
+<nav class="nav" aria-label="Principal"><div class="wrap">
+<a href="#top" id="logo" aria-label="Prevo"></a>
+<ul><li><a href="#how" data-i="n1"></a></li><li><a href="#cases" data-i="n2"></a></li><li><a href="#pricing" data-i="n3"></a></li><li><a href="#faq" data-i="n4"></a></li></ul>
+<div class="r"><div class="langs" role="group" aria-label="Language"><button type="button" data-l="es">ES</button><button type="button" data-l="en">EN</button><button type="button" data-l="pt">PT</button><button type="button" data-l="fr">FR</button></div>
+<span id="authNav"></span><a class="btn p sm mvp" href="app.html" data-i="navCta"></a></div></div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+<h1 data-i="h1"></h1>
+<p class="lead" data-i="lead"></p>
+<div class="ctas"><a class="btn p mvp" href="app.html" data-i="cta1"></a><a class="btn s" href="#how" data-i="cta2"></a></div>
+<div class="trust"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span data-i="trust"></span></div>
+<div class="fanwrap">
+<svg id="fan" viewBox="0 0 1200 260" aria-hidden="true">
+<path class="cone" d="M720 120 L1200 20 L1200 240 Z" fill="var(--mist)" opacity=".7"/>
+<path class="cone" d="M720 120 L1200 62 L1200 182 Z" fill="var(--mist)"/>
+<path class="draw" style="--len:900" d="M0 200 L60 185 L120 196 L180 160 L240 172 L300 150 L360 165 L420 120 L480 138 L540 110 L600 128 L660 100 L720 120" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>
+<path class="fdash" d="M720 120 L800 112 L880 120 L960 98 L1040 108 L1120 90 L1200 100" fill="none" stroke="#2E3CF0" stroke-width="4" stroke-dasharray="12 12" stroke-linecap="round"/>
+<g class="now"><circle cx="720" cy="120" r="16" fill="var(--paper)" stroke="#FFB020" stroke-width="7"/><circle cx="720" cy="120" r="6" fill="#FFB020"/></g>
+</svg>
+<div class="flabels"><span data-i="fl1"></span><span data-i="fl2" style="margin-left:18%"></span><span data-i="fl3"></span></div>
+</div></div></header>
+
+<div class="marquee" aria-hidden="true"><div class="track" id="track"></div></div>
+
+<section class="blk" id="problem"><div class="wrap chap">
+<div class="k" data-i="k1"></div>
+<div><h2 class="big" data-i="pT"></h2>
+<div class="pgrid"><div><h3 data-i="p1t"></h3><p data-i="p1d"></p></div><div><h3 data-i="p2t"></h3><p data-i="p2d"></p></div><div><h3 data-i="p3t"></h3><p data-i="p3d"></p></div></div><div class="stats">
+<div><b data-i="stn"></b><p data-i="st1"></p><a href="https://www.retailtouchpoints.com/features/industry-insights/ihl-study-inventory-distortion-will-cost-retailers-1-77-trillion-in-2023" target="_blank" rel="noopener">IHL Group, 2023</a></div>
+<div><b>68%</b><p data-i="st2"></p><a href="https://chainstoreage.com/study-global-retail-losses-due-inventory-distortion-hit-177-trillion" target="_blank" rel="noopener">IHL Group</a></div>
+<div><b>290 Mt</b><p data-i="st3"></p><a href="https://www.biocycle.net/2024-food-waste-index/" target="_blank" rel="noopener">UNEP Food Waste Index 2024</a></div>
+<div><b>99%</b><p data-i="st4"></p><a href="https://idbinvest.org/en/download/27053" target="_blank" rel="noopener">IDB Invest, 2026</a></div></div>
+<div class="solve"><div><h3 data-i="sv1"></h3><p data-i="sv2" style="color:var(--slate)"></p></div><ul data-list="svl"></ul></div></div></div></section>
+
+<section class="blk how" id="how"><div class="wrap">
+<div class="chap"><div class="k" data-i="k2"></div><h2 class="big" data-i="hT"></h2></div>
+<div class="steps">
+<div class="step"><b>01</b><h3 data-i="s1t"></h3><p data-i="s1d"></p></div>
+<div class="step"><b>02</b><h3 data-i="s2t"></h3><p data-i="s2d"></p></div>
+<div class="step"><b>03</b><h3 data-i="s3t"></h3><p data-i="s3d"></p></div></div>
+<h3 style="margin-top:90px;font-size:28px" data-i="dT"></h3>
+<div class="demo">
+<a class="dlink" data-s="dist" href="app.html?sample=dist"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CBD2FF" stroke-width="1.6" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><strong data-i="d1"></strong><small data-i="d1s"></small></a>
+<a class="dlink" data-s="rest" href="app.html?sample=rest"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CBD2FF" stroke-width="1.6" stroke-linecap="round"><path d="M7 3v8a2 2 0 002 2v8M7 3v5M11 3v5a2 2 0 01-2 2M17 21V3c-2 1-3 3-3 6v4h3"/></svg><strong data-i="d2"></strong><small data-i="d2s"></small></a>
+<a class="dlink" data-s="agro" href="app.html?sample=agro"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CBD2FF" stroke-width="1.6" stroke-linecap="round"><path d="M12 21V9M12 13c-4 0-6-3-6-7 4 0 6 3 6 7zm0 0c4 0 6-3 6-7-4 0-6 3-6 7z"/></svg><strong data-i="d3"></strong><small data-i="d3s"></small></a></div>
+</div></section>
+
+<section class="blk" id="cases"><div class="wrap">
+<div class="chap"><div class="k" data-i="k3"></div><h2 class="big" data-i="cT"></h2></div>
+<div class="cases">
+<article class="case"><span class="note" data-i="c1k"></span><h3 data-i="c1t"></h3><p data-i="c1d"></p><div class="r"><div><b data-i="c1a"></b><span data-i="c1al"></span></div><div><b data-i="c1b"></b><span data-i="c1bl"></span></div></div></article>
+<article class="case"><span class="note" data-i="c2k"></span><h3 data-i="c2t"></h3><p data-i="c2d"></p><div class="r"><div><b data-i="c2a"></b><span data-i="c2al"></span></div><div><b data-i="c2b"></b><span data-i="c2bl"></span></div></div></article>
+<article class="case"><span class="note" data-i="c3k"></span><h3 data-i="c3t"></h3><p data-i="c3d"></p><div class="r"><div><b data-i="c3a"></b><span data-i="c3al"></span></div><div><b data-i="c3b"></b><span data-i="c3bl"></span></div></div></article>
+<article class="case"><span class="note" data-i="c4k"></span><h3 data-i="c4t"></h3><p data-i="c4d"></p><div class="r"><div><b data-i="c4a"></b><span data-i="c4al"></span></div><div><b data-i="c4b"></b><span data-i="c4bl"></span></div></div></article>
+</div><p class="note" style="margin-top:18px" data-i="cNote"></p></div></section>
+
+<section class="blk" id="pricing" style="padding-top:40px"><div class="wrap">
+<div class="chap"><div class="k" data-i="k4"></div><h2 class="big" data-i="prT"></h2></div>
+<div class="prices">
+<div class="price f"><h3 data-i="pr1"></h3><div class="amt"><span data-price="founders">$99</span><s data-price="standard">$149</s></div><div class="per" data-i="pr1p"></div><ul data-list="pr1l"></ul><a class="btn y buy" data-plan="founders" href="#" data-i="buy1"></a><p class="note" data-i="pr1n"></p></div>
+<div class="price"><h3 data-i="pr2"></h3><div class="amt" data-price="monthly">$199</div><div class="per" data-i="pr2p"></div><ul data-list="pr2l"></ul><a class="btn p buy" data-plan="monthly" href="#" data-i="buy2"></a></div>
+<div class="price"><h3 data-i="pr3"></h3><div class="amt" data-i="pr3a"></div><div class="per" data-i="pr3p"></div><ul data-list="pr3l"></ul><a class="btn s buy" data-plan="industrial" href="#contact" data-i="buy3"></a></div></div>
+<div class="tw"><table><thead><tr><th></th><th>Excel</th><th data-i="t_c"></th><th>ERP</th><th style="color:var(--ultra)">Prevo</th></tr></thead><tbody id="cmp"></tbody></table></div>
+</div></section>
+
+<section class="blk" id="faq" style="padding-top:40px"><div class="wrap chap">
+<div class="k" data-i="k5"></div><div><h2 class="big" data-i="fT" style="margin-bottom:30px"></h2><div id="faqs"></div></div></div></section>
+
+<section id="contact" class="final">
+<div><h2 data-i="fnT"></h2><p style="font-size:19px;color:#DCE0FF;max-width:40ch" data-i="fnD"></p></div>
+<form id="lead" novalidate><input type="email" required id="em" autocomplete="email" aria-label="Email"><input type="text" id="co" autocomplete="organization" aria-label="Empresa"><select id="cty" aria-label="País"></select><select id="pl" aria-label="Plan"></select><textarea id="msg" rows="3" maxlength="2000" aria-label="Mensaje" style="padding:14px 16px;border-radius:12px;border:0;font:inherit;resize:vertical"></textarea><input type="text" id="hp" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+<button class="btn y" type="submit" id="fnBtn" data-i="fnB"></button><span class="note" data-i="fnN"></span></form></section>
+
+<footer><div class="wrap">
+<div><div id="flogo"></div><p data-i="fAbout" style="max-width:36ch"></p><p id="copy">© 2026 Prevo LLC</p><p class="note" data-i="fPay"></p></div>
+<div><h4 data-i="fP"></h4><a class="mvp" href="app.html" data-i="fP1"></a><a href="#pricing" data-i="n3"></a><a href="#faq" data-i="n4"></a></div>
+<div><h4 data-i="fC"></h4><a href="https://www.linkedin.com/" rel="noopener">LinkedIn</a><a href="https://substack.com/" rel="noopener">Substack</a><a href="https://www.instagram.com/" rel="noopener">Instagram</a><a href="https://www.tiktok.com/" rel="noopener">TikTok</a></div>
+<div><h4 data-i="fL"></h4><a class="lg" data-h="terminos" href="legal.html#terminos" data-i="fL2"></a><a class="lg" data-h="privacidad" href="legal.html#privacidad" data-i="fL1"></a><a class="lg" data-h="ia" href="legal.html#ia" data-i="fL3"></a><a class="lg" data-h="cookies" href="legal.html#cookies" data-i="fL4"></a><a id="mailto" href="mailto:hola@prevo.ai">hola@prevo.ai</a></div>
+</div></footer>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const COUNTRIES=['🇺🇸 United States','🇲🇽 México','🇵🇪 Perú','🇨🇴 Colombia','🇨🇱 Chile','🇦🇷 Argentina','🇪🇸 España','🇧🇷 Brasil','🇵🇹 Portugal','🇫🇷 France','🇧🇪 Belgique','🇨🇦 Canada','🇨🇭 Suisse','🇲🇦 Maroc','🇸🇳 Sénégal','🇨🇮 Côte d’Ivoire','🌍 Other'];
+const T={
+es:{owner:'Prevo es una marca de {n}.',fL3:'IA y regulación',fL4:'Cookies',fPay:'Pagos procesados de forma segura por Polar, nuestro comerciante registrado.',ph3:'Cuéntanos qué quieres pronosticar o tu pregunta (opcional)',plans:{founders:'Fundadores · $99',standard:'Pronóstico 48h · $149',monthly:'Mensual · $199/mes',industrial:'Proyecto industrial · desde $500',question:'Solo tengo una pregunta'},sending:'Enviando…',errEmail:'Escribe un correo válido.',errSave:'No pudimos guardar tu mensaje. Escríbenos a ',payOff:'Déjanos tu correo y te enviamos el enlace de pago seguro hoy mismo.',faqX:[['¿Necesito crear una cuenta?','No para probar: la prueba gratis funciona sin cuenta. Con una cuenta (correo o Google) guardas tus pronósticos y compras más rápido.'],['¿Cómo cumplen con las regulaciones de IA?','Usamos modelos estadísticos y de series de tiempo de riesgo bajo, siempre con supervisión humana y explicando sus límites. Seguimos el Reglamento de IA de la UE, la Ley 31814 de Perú y su reglamento, y las leyes de datos de cada país. Detalle en la página de IA y regulación.']],stn:'US$1,77 billones',st1:'cuesta cada año al comercio mundial vender de más o de menos: 7,2% de sus ventas.',st2:'de esa pérdida son quiebres de stock: clientes que querían comprar y no encontraron el producto.',st3:'toneladas de comida desperdicia al año el sector de restaurantes y servicios de comida.',st4:'de las empresas de Latinoamérica son micro, pequeñas o medianas, y emplean a dos de cada tres trabajadores.',sv1:'Qué resolvemos',sv2:'Las grandes cadenas tienen equipos y software de planificación que cuestan miles de dólares. Las pymes deciden con un promedio en Excel. Prevo les da la misma herramienta, en 48 horas y desde $99.',svl:['Cuánto comprar o producir cada semana, con un mínimo y un máximo.','Si tu método actual acierta o no, medido contra tu propio pasado.','Cuándo viene el próximo pico y cuánto stock de seguridad tener.','Sin contratar científicos de datos ni instalar nada.'],n1:'Cómo funciona',n2:'Casos',n3:'Precios',n4:'Preguntas',navCta:'Probar gratis',h1:'Tus próximas 12 semanas, hoy.',lead:'Convertimos el historial de ventas que ya tienes en un pronóstico de 12 semanas con su margen de error, y lo comparamos contra cómo planificas hoy.',cta1:'Probar con mis datos',cta2:'Ver cómo funciona',trust:'Tus datos se procesan en tu navegador. No los guardamos.',fl1:'Lo que ya pasó',fl2:'Hoy',fl3:'Lo que viene, con su margen',
+words:['distribuidoras','restaurantes','agroexportadoras','farmacias','panaderías','retail','energía','minería','ferreterías','cafeterías'],
+k1:'El problema',pT:'La mayoría planifica con Excel y con intuición.',p1t:'Inventario que se vence',p1d:'Compras de más porque no sabes cuánto vas a vender. Ese dinero queda parado en el almacén.',p2t:'Ventas que no atiendes',p2d:'Te quedas sin stock en la semana que más se vende y el cliente se va con otro.',p3t:'Ciencia de datos fuera de alcance',p3d:'Un equipo de datos cuesta más de lo que factura una pyme en un mes.',
+k2:'Cómo funciona',hT:'De tu historial a una decisión, en tres pasos.',s1t:'Sube tu historial',s1d:'Un CSV con fecha y ventas, unidades o kilos. Lo exportas de tu sistema o de Excel en dos minutos.',s2t:'Lo probamos contra el pasado',s2d:'Ocultamos tus últimas semanas, las pronosticamos con varios modelos y medimos cuál acierta más que tu método actual.',s3t:'Recibes el pronóstico',s3d:'12 semanas con valor esperado, mínimo y máximo, más recomendaciones de compra y personal.',dT:'Pruébalo ahora con un ejemplo',d1:'Distribuidor mayorista',d1s:'Ventas semanales con pico de fin de año',d2:'Cadena de restaurantes',d2s:'Clientes por día y patrón semanal',d3:'Agroexportador',d3s:'Toneladas por mes y cosecha',
+k3:'Casos de uso',cT:'Hecho para negocios con inventario, turnos o cosechas.',
+c1k:'Distribución',c1t:'Compra lo que vas a vender',c1d:'Pronóstico por producto o familia para decidir cuánto pedir al proveedor cada semana.',c1a:'12 sem.',c1al:'de visibilidad',c1b:'P10–P90',c1bl:'rango para stock de seguridad',
+c2k:'Restaurantes',c2t:'Personal e insumos según el día',c2d:'Clientes esperados por día y sede para armar turnos y compras de perecibles.',c2a:'7 días',c2al:'patrón semanal detectado',c2b:'Por sede',c2bl:'un pronóstico por local',
+c3k:'Agroexportación',c3t:'Planifica cosecha y empaque',c3d:'Volúmenes mensuales para coordinar mano de obra, empaque y reservas de contenedores.',c3a:'12 meses',c3al:'estacionalidad de campaña',c3b:'Proyecto',c3bl:'varias series y destinos',
+c4k:'Energía e industria',c4t:'Consumo y producción',c4d:'Pronóstico de consumo eléctrico o producción por línea para negociar tarifas y mantenimiento.',c4a:'kWh / t',c4al:'cualquier unidad',c4b:'Alertas',c4bl:'cuando la realidad sale del rango',
+cNote:'Los ejemplos usan datos de demostración. Cada cliente recibe la medición real contra su propio método.',
+k4:'Precios',prT:'Paga por pronóstico. Sin contratos.',pr1:'Fundadores',pr1p:'por serie · solo los primeros 5 negocios',pr1l:['Pronóstico de 12 períodos','Prueba contra tu método actual','Reporte PDF + CSV','Entrega en 48 horas','Llamada de 15 min para revisarlo'],buy1:'Reservar mi lugar',pr1n:'Pago seguro con Polar. Facturamos desde nuestra LLC en EE. UU.',
+pr2:'Mensual',pr2p:'por mes · hasta 5 series',pr2l:['Actualización cada semana','Alertas cuando cambia la tendencia','Panel con historial de aciertos','Soporte por correo'],buy2:'Suscribirme',
+pr3:'Industrial',pr3a:'desde $500',pr3p:'por proyecto',pr3l:['Agro, minería, energía','Varias series y variables externas','Modelos abiertos de base (TimesFM, Chronos)','Acuerdo de confidencialidad'],buy3:'Hablar con nosotros',
+t_c:'Consultora',cmp:[['Precio','Gratis','Miles de USD','Licencia anual','Desde $99'],['Tiempo de entrega','Inmediato','Semanas','Meses','48 horas'],['Margen de error','No','A veces','A veces','Siempre'],['Medido contra tu método','No','Rara vez','No','Siempre'],['Idiomas','—','Uno','Varios','ES · EN · PT · FR']],
+k5:'Preguntas',fT:'Lo que suelen preguntarnos.',faq:[['¿Qué datos necesito?','Un historial con fecha y un valor: ventas, unidades, clientes, kilos o kWh. Con 16 períodos ya podemos trabajar; con 2 años detectamos la estacionalidad.'],['¿Es ChatGPT?','No. Usamos modelos estadísticos y modelos abiertos especializados en series de tiempo, que pronostican números mejor que un modelo de lenguaje.'],['¿Qué pasa si el pronóstico no mejora mi método?','Te lo decimos con la medición. Si tu método ya es bueno, no tiene sentido pagar por otro.'],['¿Qué hacen con mis datos?','En la prueba gratis no salen de tu navegador. En el servicio pagado los usamos solo para tu pronóstico, con acuerdo de confidencialidad. Nunca entrenamos con ellos sin un permiso aparte.'],['¿Cómo pago?','Con tarjeta, vía Polar, que actúa como comerciante registrado y emite el comprobante. Precios en dólares.'],['¿Trabajan con empresas fuera de Latinoamérica?','Sí. Atendemos en español, inglés, portugués y francés, en cualquier país.']],
+fnT:'Tu primer pronóstico en 48 horas.',fnD:'Déjanos tu correo y te enviamos el formato para subir tu historial. Si no mejora tu método, no pagas el reporte.',fnB:'Quiero mi pronóstico',fnN:'Respondemos en menos de 24 horas.',ph1:'tu@empresa.com',ph2:'Nombre de tu empresa',fAbout:'Pronósticos de demanda, precio y producción para negocios reales, medidos contra su método actual.',fP:'Producto',fP1:'Prueba gratis',fC:'Comunidad',fL:'Legal',fL1:'Privacidad',fL2:'Términos',ok:'Gracias. Te escribimos en menos de 24 horas.'},
+en:{owner:'Prevo is a brand of {n}.',fL3:'AI & regulation',fL4:'Cookies',fPay:'Payments securely processed by Polar, our merchant of record.',ph3:'Tell us what you want to forecast, or ask a question (optional)',plans:{founders:'Founders · $99',standard:'48h forecast · $149',monthly:'Monthly · $199/mo',industrial:'Industrial project · from $500',question:'I just have a question'},sending:'Sending…',errEmail:'Please enter a valid email.',errSave:'We couldn’t save your message. Email us at ',payOff:'Leave your email and we’ll send you the secure payment link today.',faqX:[['Do I need an account?','Not to try it: the free trial works without one. With an account (email or Google) you save your forecasts and check out faster.'],['How do you comply with AI regulations?','We use low-risk statistical and time-series models, always with human oversight and clear limits. We follow the EU AI Act, Peru’s Law 31814 and its regulation, and each country’s data laws. Details on the AI & regulation page.']],stn:'$1.77T',st1:'is what selling too much or too little costs global retail every year: 7.2% of sales.',st2:'of that loss is stockouts: customers ready to buy who couldn’t find the product.',st3:'tonnes of food wasted each year by restaurants and food service.',st4:'of firms in Latin America are micro, small or medium-sized, employing two in three workers.',sv1:'What we solve',sv2:'Big chains have planning teams and software that cost thousands. Small businesses decide on a spreadsheet average. Prevo gives them the same tool, in 48 hours, from $99.',svl:['How much to buy or produce each week, with a low and a high.','Whether your current method is accurate, measured on your own past.','When the next peak is coming and how much safety stock to hold.','No data scientists to hire, nothing to install.'],n1:'How it works',n2:'Use cases',n3:'Pricing',n4:'FAQ',navCta:'Try it free',h1:'Your next 12 weeks, today.',lead:'We turn the sales history you already have into a 12-week forecast with its margin of error, and benchmark it against how you plan today.',cta1:'Try it with my data',cta2:'See how it works',trust:'Your data is processed in your browser. We don’t store it.',fl1:'What already happened',fl2:'Today',fl3:'What’s next, with its range',
+words:['distributors','restaurants','agri exporters','pharmacies','bakeries','retail','energy','mining','hardware stores','coffee shops'],
+k1:'The problem',pT:'Most businesses plan with spreadsheets and gut feel.',p1t:'Stock that expires',p1d:'You overbuy because you don’t know what you’ll sell. That cash sits in the warehouse.',p2t:'Sales you can’t serve',p2d:'You run out in your busiest week and the customer goes elsewhere.',p3t:'Data science out of reach',p3d:'A data team costs more than a small business bills in a month.',
+k2:'How it works',hT:'From your history to a decision, in three steps.',s1t:'Upload your history',s1d:'A CSV with date and sales, units or kilos. Export it from your system or spreadsheet in two minutes.',s2t:'We test it against the past',s2d:'We hide your latest weeks, forecast them with several models and measure which beats your current method.',s3t:'Get your forecast',s3d:'12 weeks with expected, low and high values, plus purchasing and staffing recommendations.',dT:'Try it now with an example',d1:'Wholesale distributor',d1s:'Weekly sales with a holiday peak',d2:'Restaurant group',d2s:'Daily covers and weekly pattern',d3:'Agri exporter',d3s:'Monthly tonnes and harvest season',
+k3:'Use cases',cT:'Built for businesses with stock, shifts or harvests.',
+c1k:'Distribution',c1t:'Buy what you’ll sell',c1d:'Forecasts per product or family to decide what to order from suppliers each week.',c1a:'12 wks',c1al:'of visibility',c1b:'P10–P90',c1bl:'range for safety stock',
+c2k:'Restaurants',c2t:'Staff and supplies by day',c2d:'Expected covers per day and location to plan shifts and perishables.',c2a:'7 days',c2al:'weekly pattern detected',c2b:'Per site',c2bl:'one forecast per location',
+c3k:'Agri export',c3t:'Plan harvest and packing',c3d:'Monthly volumes to coordinate labor, packing and container bookings.',c3a:'12 months',c3al:'seasonal campaigns',c3b:'Project',c3bl:'multiple series and markets',
+c4k:'Energy & industry',c4t:'Consumption and output',c4d:'Forecast power use or line output to negotiate tariffs and plan maintenance.',c4a:'kWh / t',c4al:'any unit',c4b:'Alerts',c4bl:'when reality leaves the range',
+cNote:'Examples use demo data. Every customer gets the real benchmark against their own method.',
+k4:'Pricing',prT:'Pay per forecast. No contracts.',pr1:'Founders',pr1p:'per series · first 5 businesses only',pr1l:['12-period forecast','Benchmark vs. your current method','PDF + CSV report','Delivered in 48 hours','15-min review call'],buy1:'Claim my spot',pr1n:'Secure checkout with Polar. Billed by our US LLC.',
+pr2:'Monthly',pr2p:'per month · up to 5 series',pr2l:['Weekly refresh','Alerts when the trend shifts','Dashboard with accuracy history','Email support'],buy2:'Subscribe',
+pr3:'Industrial',pr3a:'from $500',pr3p:'per project',pr3l:['Agri, mining, energy','Multiple series and external drivers','Open foundation models (TimesFM, Chronos)','NDA included'],buy3:'Talk to us',
+t_c:'Consultancy',cmp:[['Price','Free','Thousands of USD','Annual license','From $99'],['Turnaround','Instant','Weeks','Months','48 hours'],['Margin of error','No','Sometimes','Sometimes','Always'],['Benchmarked vs. your method','No','Rarely','No','Always'],['Languages','—','One','Several','ES · EN · PT · FR']],
+k5:'FAQ',fT:'What people usually ask.',faq:[['What data do I need?','A history with a date and a value: sales, units, covers, kilos or kWh. We can start with 16 periods; with 2 years we capture seasonality.'],['Is this ChatGPT?','No. We use statistical models and open models built for time series, which forecast numbers better than a language model.'],['What if it doesn’t beat my method?','We’ll show you the numbers. If your method is already good, there’s no point paying for another.'],['What do you do with my data?','In the free trial it never leaves your browser. In the paid service we use it only for your forecast, under NDA. We never train on it without separate consent.'],['How do I pay?','By card through Polar, our merchant of record, which issues your receipt. Prices in USD.'],['Do you work outside Latin America?','Yes. We work in English, Spanish, Portuguese and French, in any country.']],
+fnT:'Your first forecast in 48 hours.',fnD:'Leave your email and we’ll send the template to upload your history. If it doesn’t beat your method, you don’t pay for the report.',fnB:'Get my forecast',fnN:'We reply within 24 hours.',ph1:'you@company.com',ph2:'Company name',fAbout:'Demand, price and production forecasts for real businesses, benchmarked against how they plan today.',fP:'Product',fP1:'Free trial',fC:'Community',fL:'Legal',fL1:'Privacy',fL2:'Terms',ok:'Thanks. We’ll email you within 24 hours.'},
+pt:{owner:'Prevo é uma marca da {n}.',fL3:'IA e regulação',fL4:'Cookies',fPay:'Pagamentos processados com segurança pela Polar, nosso comerciante registrado.',ph3:'Conte o que você quer prever ou sua pergunta (opcional)',plans:{founders:'Fundadores · US$ 99',standard:'Previsão 48h · US$ 149',monthly:'Mensal · US$ 199/mês',industrial:'Projeto industrial · a partir de US$ 500',question:'Só tenho uma pergunta'},sending:'Enviando…',errEmail:'Digite um e-mail válido.',errSave:'Não conseguimos salvar sua mensagem. Escreva para ',payOff:'Deixe seu e-mail e enviamos o link de pagamento seguro ainda hoje.',faqX:[['Preciso criar uma conta?','Não para testar: o teste grátis funciona sem conta. Com uma conta (e-mail ou Google) você salva suas previsões e compra mais rápido.'],['Como vocês cumprem as regulações de IA?','Usamos modelos estatísticos e de séries temporais de baixo risco, sempre com supervisão humana e limites claros. Seguimos o Regulamento de IA da UE, a Lei 31814 do Peru e seu regulamento, e as leis de dados de cada país. Detalhes na página de IA e regulação.']],stn:'US$ 1,77 tri',st1:'é quanto o varejo mundial perde por ano vendendo demais ou de menos: 7,2% das vendas.',st2:'dessa perda são rupturas: clientes prontos para comprar que não acharam o produto.',st3:'toneladas de comida desperdiçadas por ano por restaurantes e food service.',st4:'das empresas da América Latina são micro, pequenas ou médias e empregam dois em cada três trabalhadores.',sv1:'O que resolvemos',sv2:'As grandes redes têm equipes e softwares de planejamento que custam milhares de dólares. As PMEs decidem pela média da planilha. A Prevo entrega a mesma ferramenta, em 48 horas, a partir de US$ 99.',svl:['Quanto comprar ou produzir por semana, com mínimo e máximo.','Se seu método atual acerta, medido com seu próprio passado.','Quando vem o próximo pico e quanto estoque de segurança manter.','Sem contratar cientistas de dados nem instalar nada.'],n1:'Como funciona',n2:'Casos',n3:'Preços',n4:'Perguntas',navCta:'Testar grátis',h1:'Suas próximas 12 semanas, hoje.',lead:'Transformamos o histórico de vendas que você já tem em uma previsão de 12 semanas com margem de erro, e comparamos com a forma como você planeja hoje.',cta1:'Testar com meus dados',cta2:'Ver como funciona',trust:'Seus dados são processados no seu navegador. Não guardamos nada.',fl1:'O que já aconteceu',fl2:'Hoje',fl3:'O que vem, com sua margem',
+words:['distribuidoras','restaurantes','agroexportadoras','farmácias','padarias','varejo','energia','mineração','lojas de material','cafeterias'],
+k1:'O problema',pT:'A maioria planeja com planilha e intuição.',p1t:'Estoque que vence',p1d:'Você compra demais porque não sabe quanto vai vender. Esse dinheiro fica parado no depósito.',p2t:'Vendas perdidas',p2d:'Falta produto na semana de maior movimento e o cliente vai para o concorrente.',p3t:'Ciência de dados fora do alcance',p3d:'Uma equipe de dados custa mais do que uma PME fatura em um mês.',
+k2:'Como funciona',hT:'Do seu histórico a uma decisão, em três passos.',s1t:'Envie seu histórico',s1d:'Um CSV com data e vendas, unidades ou quilos. Você exporta do seu sistema ou do Excel em dois minutos.',s2t:'Testamos com o passado',s2d:'Escondemos suas últimas semanas, prevemos com vários modelos e medimos qual acerta mais que seu método atual.',s3t:'Receba a previsão',s3d:'12 semanas com valor esperado, mínimo e máximo, e recomendações de compra e equipe.',dT:'Teste agora com um exemplo',d1:'Distribuidor atacadista',d1s:'Vendas semanais com pico de fim de ano',d2:'Rede de restaurantes',d2s:'Clientes por dia e padrão semanal',d3:'Agroexportador',d3s:'Toneladas por mês e safra',
+k3:'Casos de uso',cT:'Feito para negócios com estoque, turnos ou safras.',
+c1k:'Distribuição',c1t:'Compre o que vai vender',c1d:'Previsão por produto ou família para decidir quanto pedir ao fornecedor toda semana.',c1a:'12 sem.',c1al:'de visibilidade',c1b:'P10–P90',c1bl:'faixa para estoque de segurança',
+c2k:'Restaurantes',c2t:'Equipe e insumos por dia',c2d:'Clientes esperados por dia e unidade para montar turnos e compras de perecíveis.',c2a:'7 dias',c2al:'padrão semanal detectado',c2b:'Por unidade',c2bl:'uma previsão por loja',
+c3k:'Agroexportação',c3t:'Planeje colheita e embalagem',c3d:'Volumes mensais para coordenar mão de obra, embalagem e reservas de contêiner.',c3a:'12 meses',c3al:'sazonalidade da safra',c3b:'Projeto',c3bl:'várias séries e destinos',
+c4k:'Energia e indústria',c4t:'Consumo e produção',c4d:'Previsão de consumo elétrico ou produção por linha para negociar tarifas e manutenção.',c4a:'kWh / t',c4al:'qualquer unidade',c4b:'Alertas',c4bl:'quando a realidade sai da faixa',
+cNote:'Os exemplos usam dados de demonstração. Cada cliente recebe a medição real contra seu próprio método.',
+k4:'Preços',prT:'Pague por previsão. Sem contrato.',pr1:'Fundadores',pr1p:'por série · só os 5 primeiros negócios',pr1l:['Previsão de 12 períodos','Teste contra seu método atual','Relatório PDF + CSV','Entrega em 48 horas','Call de 15 min para revisar'],buy1:'Garantir minha vaga',pr1n:'Pagamento seguro via Polar. Faturamos pela nossa LLC nos EUA.',
+pr2:'Mensal',pr2p:'por mês · até 5 séries',pr2l:['Atualização semanal','Alertas quando a tendência muda','Painel com histórico de acertos','Suporte por e-mail'],buy2:'Assinar',
+pr3:'Industrial',pr3a:'a partir de $500',pr3p:'por projeto',pr3l:['Agro, mineração, energia','Várias séries e variáveis externas','Modelos abertos de base (TimesFM, Chronos)','Acordo de confidencialidade'],buy3:'Falar com a gente',
+t_c:'Consultoria',cmp:[['Preço','Grátis','Milhares de USD','Licença anual','A partir de $99'],['Prazo','Imediato','Semanas','Meses','48 horas'],['Margem de erro','Não','Às vezes','Às vezes','Sempre'],['Medido contra seu método','Não','Raramente','Não','Sempre'],['Idiomas','—','Um','Vários','ES · EN · PT · FR']],
+k5:'Perguntas',fT:'O que costumam perguntar.',faq:[['Quais dados eu preciso?','Um histórico com data e um valor: vendas, unidades, clientes, quilos ou kWh. Com 16 períodos já dá; com 2 anos captamos a sazonalidade.'],['É o ChatGPT?','Não. Usamos modelos estatísticos e modelos abertos feitos para séries temporais, que preveem números melhor que um modelo de linguagem.'],['E se não melhorar meu método?','A gente mostra a medição. Se seu método já é bom, não faz sentido pagar por outro.'],['O que vocês fazem com meus dados?','No teste grátis eles não saem do seu navegador. No serviço pago usamos só para sua previsão, com acordo de confidencialidade. Nunca treinamos com eles sem permissão à parte.'],['Como pago?','Com cartão, via Polar, que atua como comerciante registrado e emite o comprovante. Preços em dólar.'],['Atendem fora da América Latina?','Sim. Atendemos em português, espanhol, inglês e francês, em qualquer país.']],
+fnT:'Sua primeira previsão em 48 horas.',fnD:'Deixe seu e-mail e enviamos o modelo para subir seu histórico. Se não melhorar seu método, você não paga o relatório.',fnB:'Quero minha previsão',fnN:'Respondemos em até 24 horas.',ph1:'voce@empresa.com',ph2:'Nome da empresa',fAbout:'Previsões de demanda, preço e produção para negócios reais, medidas contra o método atual.',fP:'Produto',fP1:'Teste grátis',fC:'Comunidade',fL:'Legal',fL1:'Privacidade',fL2:'Termos',ok:'Obrigado. Escrevemos em até 24 horas.'},
+fr:{owner:'Prevo est une marque de {n}.',fL3:'IA et réglementation',fL4:'Cookies',fPay:'Paiements traités en toute sécurité par Polar, notre marchand officiel.',ph3:'Dites-nous ce que vous voulez prévoir, ou posez une question (facultatif)',plans:{founders:'Fondateurs · 99 $',standard:'Prévision 48 h · 149 $',monthly:'Mensuel · 199 $/mois',industrial:'Projet industriel · dès 500 $',question:'J’ai juste une question'},sending:'Envoi…',errEmail:'Saisissez un e-mail valide.',errSave:'Impossible d’enregistrer votre message. Écrivez-nous à ',payOff:'Laissez votre e-mail et nous vous envoyons le lien de paiement sécurisé aujourd’hui.',faqX:[['Dois-je créer un compte ?','Pas pour essayer : l’essai gratuit fonctionne sans compte. Avec un compte (e-mail ou Google), vous enregistrez vos prévisions et payez plus vite.'],['Comment respectez-vous les réglementations sur l’IA ?','Nous utilisons des modèles statistiques et de séries temporelles à faible risque, toujours sous supervision humaine et avec des limites claires. Nous suivons le règlement européen sur l’IA, la loi péruvienne 31814 et son règlement, et les lois sur les données de chaque pays. Détails sur la page IA et réglementation.']],stn:'1 770 Md$',st1:'c’est ce que coûtent chaque année au commerce mondial les ruptures et les surstocks : 7,2 % des ventes.',st2:'de cette perte vient des ruptures : des clients prêts à acheter qui ne trouvent pas le produit.',st3:'tonnes de nourriture gaspillées chaque année par la restauration.',st4:'des entreprises d’Amérique latine sont des TPE ou PME, et emploient deux salariés sur trois.',sv1:'Ce que nous résolvons',sv2:'Les grandes enseignes ont des équipes et des logiciels de planification qui coûtent des milliers de dollars. Les PME décident sur une moyenne Excel. Prevo leur donne le même outil, en 48 heures, dès 99 $.',svl:['Combien acheter ou produire chaque semaine, avec un minimum et un maximum.','Si votre méthode actuelle est juste, mesurée sur votre propre historique.','Quand arrive le prochain pic et combien de stock de sécurité garder.','Sans recruter de data scientists ni rien installer.'],n1:'Fonctionnement',n2:'Cas d’usage',n3:'Tarifs',n4:'Questions',navCta:'Essai gratuit',h1:'Vos 12 prochaines semaines, aujourd’hui.',lead:'Nous transformons votre historique de ventes en une prévision sur 12 semaines avec sa marge d’erreur, comparée à votre façon de planifier aujourd’hui.',cta1:'Essayer avec mes données',cta2:'Voir le fonctionnement',trust:'Vos données sont traitées dans votre navigateur. Nous ne les conservons pas.',fl1:'Ce qui s’est passé',fl2:'Aujourd’hui',fl3:'Ce qui vient, avec sa marge',
+words:['distributeurs','restaurants','exportateurs agricoles','pharmacies','boulangeries','commerce','énergie','mines','quincailleries','cafés'],
+k1:'Le problème',pT:'La plupart planifient avec Excel et à l’intuition.',p1t:'Du stock qui périme',p1d:'Vous achetez trop faute de savoir ce que vous vendrez. Cet argent dort dans l’entrepôt.',p2t:'Des ventes perdues',p2d:'Rupture pendant la semaine la plus chargée, et le client part chez un concurrent.',p3t:'La data science hors de portée',p3d:'Une équipe data coûte plus que le chiffre d’affaires mensuel d’une PME.',
+k2:'Fonctionnement',hT:'De votre historique à une décision, en trois étapes.',s1t:'Importez votre historique',s1d:'Un CSV avec date et ventes, unités ou kilos. Exporté de votre logiciel ou d’Excel en deux minutes.',s2t:'Nous le testons sur le passé',s2d:'Nous masquons vos dernières semaines, les prévoyons avec plusieurs modèles et mesurons lequel bat votre méthode actuelle.',s3t:'Recevez la prévision',s3d:'12 semaines avec valeur attendue, basse et haute, et des recommandations d’achat et de personnel.',dT:'Essayez maintenant avec un exemple',d1:'Grossiste distributeur',d1s:'Ventes hebdomadaires avec pic de fin d’année',d2:'Groupe de restaurants',d2s:'Couverts par jour et cycle hebdomadaire',d3:'Exportateur agricole',d3s:'Tonnes par mois et saison de récolte',
+k3:'Cas d’usage',cT:'Pensé pour les entreprises avec stock, équipes ou récoltes.',
+c1k:'Distribution',c1t:'Achetez ce que vous vendrez',c1d:'Prévision par produit ou famille pour décider des commandes fournisseurs chaque semaine.',c1a:'12 sem.',c1al:'de visibilité',c1b:'P10–P90',c1bl:'fourchette pour le stock de sécurité',
+c2k:'Restaurants',c2t:'Personnel et achats selon le jour',c2d:'Couverts attendus par jour et par site pour planifier équipes et produits frais.',c2a:'7 jours',c2al:'cycle hebdomadaire détecté',c2b:'Par site',c2bl:'une prévision par établissement',
+c3k:'Export agricole',c3t:'Planifiez récolte et conditionnement',c3d:'Volumes mensuels pour coordonner main-d’œuvre, conditionnement et réservations de conteneurs.',c3a:'12 mois',c3al:'saisonnalité des campagnes',c3b:'Projet',c3bl:'plusieurs séries et destinations',
+c4k:'Énergie et industrie',c4t:'Consommation et production',c4d:'Prévision de consommation électrique ou de production par ligne pour négocier tarifs et maintenance.',c4a:'kWh / t',c4al:'toute unité',c4b:'Alertes',c4bl:'quand la réalité sort de la fourchette',
+cNote:'Les exemples utilisent des données de démonstration. Chaque client reçoit la mesure réelle contre sa propre méthode.',
+k4:'Tarifs',prT:'Payez par prévision. Sans engagement.',pr1:'Fondateurs',pr1p:'par série · 5 premières entreprises uniquement',pr1l:['Prévision sur 12 périodes','Comparaison avec votre méthode actuelle','Rapport PDF + CSV','Livraison en 48 h','Appel de 15 min pour le revoir'],buy1:'Réserver ma place',pr1n:'Paiement sécurisé via Polar. Facturé par notre LLC américaine.',
+pr2:'Mensuel',pr2p:'par mois · jusqu’à 5 séries',pr2l:['Mise à jour chaque semaine','Alertes en cas de changement de tendance','Tableau de bord avec historique de précision','Support par e-mail'],buy2:'M’abonner',
+pr3:'Industriel',pr3a:'dès 500 $',pr3p:'par projet',pr3l:['Agriculture, mines, énergie','Plusieurs séries et variables externes','Modèles ouverts de fondation (TimesFM, Chronos)','Accord de confidentialité'],buy3:'Nous contacter',
+t_c:'Cabinet de conseil',cmp:[['Prix','Gratuit','Milliers de USD','Licence annuelle','Dès 99 $'],['Délai','Immédiat','Semaines','Mois','48 heures'],['Marge d’erreur','Non','Parfois','Parfois','Toujours'],['Comparé à votre méthode','Non','Rarement','Non','Toujours'],['Langues','—','Une','Plusieurs','ES · EN · PT · FR']],
+k5:'Questions',fT:'Ce qu’on nous demande souvent.',faq:[['De quelles données ai-je besoin ?','Un historique avec une date et une valeur : ventes, unités, couverts, kilos ou kWh. 16 périodes suffisent pour commencer ; avec 2 ans, nous captons la saisonnalité.'],['Est-ce ChatGPT ?','Non. Nous utilisons des modèles statistiques et des modèles ouverts conçus pour les séries temporelles, plus précis sur les chiffres qu’un modèle de langage.'],['Et si cela ne bat pas ma méthode ?','Nous vous montrons la mesure. Si votre méthode est déjà bonne, inutile de payer pour une autre.'],['Que faites-vous de mes données ?','Pendant l’essai gratuit, elles ne quittent pas votre navigateur. En service payant, elles servent uniquement à votre prévision, sous accord de confidentialité. Jamais d’entraînement sans consentement séparé.'],['Comment payer ?','Par carte via Polar, notre marchand officiel, qui émet votre reçu. Prix en dollars.'],['Travaillez-vous hors d’Amérique latine ?','Oui. Nous travaillons en français, anglais, espagnol et portugais, dans tous les pays.']],
+fnT:'Votre première prévision en 48 heures.',fnD:'Laissez votre e-mail et nous vous envoyons le modèle pour importer votre historique. Si cela ne bat pas votre méthode, le rapport est gratuit.',fnB:'Je veux ma prévision',fnN:'Réponse sous 24 heures.',ph1:'vous@entreprise.com',ph2:'Nom de l’entreprise',fAbout:'Prévisions de demande, de prix et de production pour les entreprises réelles, comparées à leur méthode actuelle.',fP:'Produit',fP1:'Essai gratuit',fC:'Communauté',fL:'Mentions légales',fL1:'Confidentialité',fL2:'Conditions',ok:'Merci. Réponse sous 24 heures.'}};
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const C=Prevo.C;let L=Prevo.getLang();
+window.addEventListener('error',e=>{e.preventDefault();return true});
+const money=v=>L=='fr'?v+' $':(L=='pt'?'US$ '+v:'$'+v);
+function apply(){try{applyInner()}catch(err){console.warn('lang',err)}}
+function applyInner(){const d=T[L];document.documentElement.lang=L;document.title='Prevo — '+d.h1.replace(/\.$/,'');
+$$('[data-i]').forEach(e=>{const v=d[e.dataset.i];if(typeof v=='string')e.textContent=v});
+$$('[data-list]').forEach(u=>u.innerHTML=d[u.dataset.list].map(x=>`<li>${x}</li>`).join(''));
+$('#track').innerHTML=[...d.words,...d.words].map(w=>`<span>${w}</span>`).join('');
+$('#cmp').innerHTML=d.cmp.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td class="us">${r[4]}</td></tr>`).join('');
+$('#faqs').innerHTML=[...d.faq,...d.faqX].map((f,i)=>`<details ${i==0?'open':''}><summary>${f[0]}</summary><p>${f[1]}</p></details>`).join('');
+$('#em').placeholder=d.ph1;$('#co').placeholder=d.ph2;$('#msg').placeholder=d.ph3;
+const cur=$('#pl').value||'founders';$('#pl').innerHTML=Object.entries(d.plans).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');$('#pl').value=cur;
+$$('[data-price]').forEach(e=>e.textContent=money((C.prices||{})[e.dataset.price]||e.textContent.replace(/\D/g,'')));
+$$('.langs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l==L));
+$$('a.mvp').forEach(a=>a.href=Prevo.link('app.html'));$$('a.dlink').forEach(a=>a.href=Prevo.link('app.html',{sample:a.dataset.s}));
+$$('a.lg').forEach(a=>a.href=Prevo.link('legal.html')+'#'+a.dataset.h);
+Prevo.renderAuth($('#authNav'),{next:'app.html'});if(window.__cp)window.__cp();}
+$$('.langs button').forEach(b=>b.onclick=()=>{L=b.dataset.l;Prevo.setLang(L);apply()});
+const lt=Prevo.isDark()?'negative':'positive';$('#logo').innerHTML=Prevo.logo(lt,30);$('#flogo').innerHTML=Prevo.logo(lt,28);
+$('#cty').innerHTML=COUNTRIES.map(c=>`<option>${c}</option>`).join('');
+$('#mailto').href='mailto:'+(C.contactEmail||'hola@prevo.ai');$('#mailto').textContent=C.contactEmail||'hola@prevo.ai';
+window.__cp=()=>$('#copy').textContent='© 2026 '+(C.legalName||'Limly LLC')+' · '+T[L].owner.replace('{n}',C.legalName||'Limly LLC');
+function toast(m,ms){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),ms||3500)}
+$$('.buy').forEach(a=>a.onclick=async e=>{e.preventDefault();const plan=a.dataset.plan;
+  const r=await Prevo.checkout(plan,{medium:'landing-pricing'});
+  if(!r.ok){$('#pl').value=plan;document.querySelector('#contact').scrollIntoView({behavior:'smooth'});if(plan!='industrial')toast(T[L].payOff,5000);setTimeout(()=>$('#em').focus(),600)}});
+$('#lead').onsubmit=async e=>{e.preventDefault();const d=T[L];const email=$('#em').value.trim();
+  if(!Prevo.emailOk(email)){toast(d.errEmail);$('#em').focus();return}
+  const btn=$('#fnBtn');btn.disabled=true;btn.textContent=d.sending;
+  const r=await Prevo.saveLead({email,company:$('#co').value.trim()||null,country:$('#cty').value,plan:$('#pl').value,message:$('#msg').value.trim()||null,source:'landing-contact',_hp:$('#hp').value});
+  btn.disabled=false;btn.textContent=d.fnB;
+  if(r.where=='supabase'||r.where=='notify'||r.where=='spam'){toast(d.ok);e.target.reset();$('#pl').value='founders'}
+  else{toast(d.errSave+(C.contactEmail||'hola@prevo.ai'),6000);setTimeout(()=>location.href=`mailto:${C.contactEmail||'hola@prevo.ai'}?subject=${encodeURIComponent('Prevo · '+($('#co').value||email))}&body=${encodeURIComponent(email+'\n'+$('#co').value+'\n'+$('#cty').value+'\n'+$('#pl').value+'\n\n'+$('#msg').value)}`,1200)}};
+Prevo.onAuth(()=>Prevo.renderAuth($('#authNav'),{next:'app.html'}));
+apply();
+</script></body></html>

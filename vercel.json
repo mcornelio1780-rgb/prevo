@@ -1,0 +1,18 @@
+{
+  "headers": [
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+      { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+      { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+    ]},
+    { "source": "/config.js", "headers": [ { "key": "Cache-Control", "value": "no-cache" } ] }
+  ],
+  "redirects": [
+    { "source": "/mvp", "destination": "/app.html", "permanent": false },
+    { "source": "/app", "destination": "/app.html", "permanent": false },
+    { "source": "/login", "destination": "/login.html", "permanent": false },
+    { "source": "/legal", "destination": "/legal.html", "permanent": false },
+    { "source": "/gracias", "destination": "/gracias.html", "permanent": false }
+  ]
+}

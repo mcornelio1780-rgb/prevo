@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prevo — Legal</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base.css">
+<style>
+.wrap{max-width:1100px;margin:0 auto;padding:50px 5vw 90px;display:grid;grid-template-columns:230px 1fr;gap:50px}
+aside nav{position:sticky;top:20px;display:grid;gap:4px}
+aside a{display:block;padding:9px 12px;border-radius:8px;text-decoration:none;color:var(--slate);font-weight:500}
+aside a.on{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+article section{margin-bottom:60px;scroll-margin-top:20px}
+article h2{font-size:clamp(28px,3vw,38px);margin-bottom:6px}
+article h3{font-size:18px;margin:24px 0 6px}
+article p{margin:0;max-width:70ch;color:var(--ink)}
+@media (max-width:800px){.wrap{grid-template-columns:1fr;gap:20px}aside nav{position:static;display:flex;flex-wrap:wrap}}
+</style>
+<script src="config.js"></script>
+<script src="assets/prevo.js"></script>
+<script src="assets/legal-content.js"></script>
+</head><body>
+<header class="top"><a id="logo" href="index.html" aria-label="Prevo"></a>
+<nav><select id="lang" aria-label="Idioma"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option></select></nav></header>
+<div class="wrap"><aside><nav id="toc"></nav></aside><article id="doc"></article></div>
+<script>
+window.addEventListener('error',e=>{e.preventDefault();return true});
+const $=s=>document.querySelector(s);const C=Prevo.C;let L=Prevo.getLang();
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const fill=s=>esc(s).replace(/\{name\}/g,esc(C.legalName||'Prevo LLC')).replace(/\{addr\}/g,esc(C.legalAddress||'')).replace(/\{mail\}/g,`<a href="mailto:${esc(C.contactEmail||'hola@prevo.ai')}">${esc(C.contactEmail||'hola@prevo.ai')}</a>`);
+const KEYS=['terminos','privacidad','ia','cookies'];
+function render(){const d=LEGAL[L];document.documentElement.lang=L;$('#lang').value=L;document.title='Prevo — '+d.title;
+ $('#toc').innerHTML=KEYS.map(k=>`<a href="#${k}" data-k="${k}">${d.nav[k]}</a>`).join('');
+ $('#doc').innerHTML=KEYS.map(k=>`<section id="${k}"><h2>${d.nav[k]}</h2><p class="note">${d.updated}: ${esc(C.legalUpdated||'')}</p>${d[k].map(([h,p])=>`<h3>${esc(h)}</h3><p>${fill(p)}</p>`).join('')}</section>`).join('')+`<p class="note">${fill(d.note)}</p>`;
+ $('#logo').href=Prevo.link('index.html');mark();
+ const h=location.hash.slice(1);if(KEYS.includes(h))setTimeout(()=>document.getElementById(h).scrollIntoView(),50)}
+function mark(){const h=location.hash.slice(1)||'terminos';document.querySelectorAll('#toc a').forEach(a=>a.classList.toggle('on',a.dataset.k==h))}
+window.addEventListener('hashchange',mark);
+$('#lang').onchange=e=>{L=e.target.value;Prevo.setLang(L);render()};
+$('#logo').innerHTML=Prevo.logo(Prevo.isDark()?'negative':'positive',30);render();
+</script></body></html>
